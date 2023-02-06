@@ -2,17 +2,27 @@ var intHighest = 0;
 var objType = "";
 function setType(_type) {
     objType = _type;
+    if (objType === "clear") {
+        clearZone();
+        objType = "";
+    }
+
 }
 
 function clearZone() {
-    // const arrZones = getZones();
-    // console.log("arrZones :", arrZones);
-    // const boxes = document.getElementsByClassName('box');
-    // for (const box of boxes) {
-    //   box.addEventListener('click', (event) => {
-    //     event.target.remove();
-    //   });
-    // }
+    const boxes = document.getElementsByClassName('boxNotActive');
+    const arrZones = getZones();
+    for (const box of boxes) {
+        box.addEventListener('click', (event) => {
+            let seq = box.id.replace("box", "");
+            let zone = arrZones.filter(zone => zone.sequence === seq);
+            deleteZone(...zone);
+            event.target.remove();
+        });
+    }
+
+
+
 }
 
 // Get ratio (that is: 2 means original has twice the size; 1/2 means original has half the size)
@@ -31,7 +41,7 @@ function newZone(_event) {
             height: 75,
             sequence: getNextZoneSequence(),
             canDelete: true,
-            objType: "ractangle"
+            zoneType: "ractangle"
         };
 
         addZone(objZone);
@@ -45,7 +55,7 @@ function newZone(_event) {
             height: 0,
             sequence: getNextZoneSequence(),
             canDelete: true,
-            objType: "point"
+            zoneType: "point"
         };
         addZone(objZone);
         addZoneBox(objZone, _event);
@@ -58,14 +68,12 @@ function newZone(_event) {
             height: 75,
             sequence: getNextZoneSequence(),
             canDelete: true,
-            objType: "circle"
+            zoneType: "circle"
         };
         addZone(objZone);
         addZoneBox(objZone, _event);
     }
-    if (objType === "clear") {
-        clearZone();
-    }
+
     objType = "";
 }
 
@@ -73,7 +81,7 @@ function newZone(_event) {
 function addZoneBox(_objZone, _event) {
     const theDiv = document.createElement("div");
 
-    theDiv.className = _objZone.objType === "circle" ? "boxNotActive circle" : "boxNotActive";
+    theDiv.className = _objZone.zoneType === "circle" ? "boxNotActive circle" : "boxNotActive";
 
     theDiv.id = "box" + _objZone.sequence;
     theDiv.style.position = "absolute";
@@ -87,12 +95,12 @@ function addZoneBox(_objZone, _event) {
         "px";
     theDiv.style.width = _objZone.width + "px";
     theDiv.style.height = _objZone.height + "px";
-    theDiv.style.zIndex = _objZone.sequence;
+    theDiv.style.zIndex = _objZone.sequence + 1;
     theDiv.canDelete = _objZone.canDelete;
 
     makeDraggable(theDiv, _objZone);
     if (objType != "point") {
-        makeResizable(theDiv);
+        makeResizable(theDiv, _objZone);
     }
 
     document.getElementById("main-body").appendChild(theDiv);
@@ -123,7 +131,7 @@ function makeDraggable(_element, _objZone) {
         document.onmouseup = closeDragElement;
         // call a function whenever the cursor moves:
         document.onmousemove = elementDrag;
-        _element.className = _objZone.objType === "circle" ? "box circle" : "box";
+        _element.className = _objZone.zoneType === "circle" ? "box circle" : "box";
 
     }
 
@@ -148,13 +156,14 @@ function makeDraggable(_element, _objZone) {
         document.onmouseup = null;
         document.onmousemove = null;
 
-        _element.className = _objZone.objType === "circle" ? "boxNotActive circle" : "boxNotActive";
+        _element.className = _objZone.zoneType === "circle" ? "boxNotActive circle" : "boxNotActive";
 
 
         const objZone = getZoneFromBox(_element);
 
         if (zoneOutsideImage(objZone)) {
             deleteZone(objZone);
+            document.getElementById("box" + objZone.sequence).remove();
         } else {
             updateZone(objZone);
         }
@@ -162,7 +171,7 @@ function makeDraggable(_element, _objZone) {
 }
 
 // Make eleemnt resizable by adding dummy divs to the right and to the bottom of element
-function makeResizable(_element) {
+function makeResizable(_element, _objZone) {
     var startX, startY, startWidth, startHeight;
 
     var right = document.createElement("div");
@@ -198,7 +207,7 @@ function makeResizable(_element) {
         document.documentElement.addEventListener("mousemove", doDrag, false);
         document.documentElement.addEventListener("mouseup", stopDrag, false);
 
-        _element.className = _objZone.objType === "circle" ? "box circle" : "box";
+        _element.className = _objZone.zoneType === "circle" ? "box circle" : "box";
     }
 
     function doDrag(e) {
@@ -219,7 +228,7 @@ function makeResizable(_element) {
             false
         );
 
-        _element.className = _objZone.objType === "circle" ? "boxNotActive circle" : "boxNotActive";
+        _element.className = _objZone.zoneType === "circle" ? "boxNotActive circle" : "boxNotActive";
 
         updateZone(getZoneFromBox(_element));
     }
@@ -256,6 +265,7 @@ function getZoneFromBox(_element) {
             objReturn.width = getX(_element.style.width);
             objReturn.height = getX(_element.style.height);
             objReturn.canDelete = _element.canDelete;
+            objReturn.objType = _element.objType;
         }
     });
 
@@ -300,17 +310,8 @@ function updateZone(_objZone) {
 
 // Delete a zone from zone collection
 function deleteZone(_objZone) {
-    const arrZones = new Array();
-
-    getZones().forEach((objZone) => {
-        if (objZone.sequence != _objZone.sequence) {
-            arrZones.push(objZone);
-        }
-    });
-
+    const arrZones = getZones().filter(objZone => objZone.sequence !== _objZone.sequence);
     saveZones(arrZones);
-
-    document.getElementById("box" + _objZone.sequence).remove();
 }
 
 // Add a zone to zone collection
@@ -346,7 +347,7 @@ function saveZones(_arr) {
             " " +
             parseInt(objZone.height * dblRatio) +
             " " +
-            objZone.sequence;
+            objZone.sequence + " " + objZone.zoneType;
     });
 
     document.getElementsByName("ctrZones")[0].value = strZones;
@@ -359,12 +360,12 @@ function getZones() {
     const elImage = document.getElementById("image");
     const dblRatio = getImageRatio(elImage);
 
+
     strZones.split(/\r?\n/).forEach((strLine) => {
         if (strLine.trim().length > 0) {
             const arrTokens = strLine
                 .split(" ")
                 .filter((e) => e.trim().length > 0);
-
             arrZones.push({
                 x:
                     parseInt(arrTokens[0] / dblRatio) + getElementPosition(elImage).x,
@@ -373,6 +374,7 @@ function getZones() {
                 width: parseInt(arrTokens[2] / dblRatio),
                 height: parseInt(arrTokens[3] / dblRatio),
                 sequence: arrTokens[4],
+                zoneType: arrTokens[5],
             });
         }
     });
