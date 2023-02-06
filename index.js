@@ -2,19 +2,18 @@ var intHighest = 0;
 var objType = "";
 function setType(_type) {
     objType = _type;
-    // if (objType === "clear") {
-    //   clearZone();
+}
+
+function clearZone() {
+    // const arrZones = getZones();
+    // console.log("arrZones :", arrZones);
+    // const boxes = document.getElementsByClassName('box');
+    // for (const box of boxes) {
+    //   box.addEventListener('click', (event) => {
+    //     event.target.remove();
+    //   });
     // }
 }
-// function clearZone() {
-//   const arrZones = getZones();
-//   console.log("arrZones :", arrZones);
-//   arrZones.forEach((element) => {
-//     const div = document.getElementById(`box${element.sequence}`);
-//     div.remove();
-//     removeZone(element);
-//   });
-// }
 
 // Get ratio (that is: 2 means original has twice the size; 1/2 means original has half the size)
 function getImageRatio(_imgElement) {
@@ -64,6 +63,9 @@ function newZone(_event) {
         addZone(objZone);
         addZoneBox(objZone, _event);
     }
+    if (objType === "clear") {
+        clearZone();
+    }
     objType = "";
 }
 
@@ -85,6 +87,7 @@ function addZoneBox(_objZone, _event) {
         "px";
     theDiv.style.width = _objZone.width + "px";
     theDiv.style.height = _objZone.height + "px";
+    theDiv.style.zIndex = _objZone.sequence;
     theDiv.canDelete = _objZone.canDelete;
 
     makeDraggable(theDiv, _objZone);
