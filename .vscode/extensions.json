@@ -1,5 +1,10 @@
 {
-    "recommendations": [
-        "zignd.html-css-class-completion"
-    ]
+  "recommendations": [
+    "zignd.html-css-class-completion",
+    "dzannotti.vscode-babel-coloring",
+    "mgmcdermott.vscode-language-babel",
+    "rodrigovallades.es7-react-js-snippets",
+    "jmsv.javascriptsnippetsstandard",
+    "runningcoder.js-snippets"
+  ]
 }
