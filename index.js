@@ -6,6 +6,12 @@ function setType(_type) {
         clearZone();
         objType = "";
     }
+    if (objType === "ractangle") {
+        document.getElementById("image").click();
+    }
+    if (objType === "circle") {
+        document.getElementById("image").click();
+    }
 
 }
 
@@ -34,19 +40,205 @@ function getImageRatio(_imgElement) {
 function newZone(_event) {
     console.log("objType :", objType);
     if (objType === "ractangle") {
-        const objZone = {
-            x: _event.clientX,
-            y: _event.clientY,
-            width: 75,
-            height: 75,
-            sequence: getNextZoneSequence(),
-            canDelete: true,
-            zoneType: "ractangle"
+
+        const Canvas = document.createElement("canvas");
+        Canvas.id = "canvas";
+        Canvas.width = document.getElementById("image").width;
+        Canvas.height = document.getElementById("image").height;
+        Canvas.style.position = "absolute";
+        Canvas.style.top = "40px";
+        Canvas.style.left = "8px";
+        document.getElementById("main-body").appendChild(Canvas);
+
+
+        var canvas = document.getElementById("canvas");
+        var ctx = canvas.getContext("2d");
+        canvas.style.cursor = "crosshair";
+
+        // style the context
+        ctx.strokeStyle = "red";
+        ctx.lineWidth = 2;
+
+        // calculate where the canvas is on the window
+        // (used to help calculate mouseX/mouseY)
+        var canvasOffset = canvas.getBoundingClientRect();
+        var offsetX = canvasOffset.left;
+        var offsetY = canvasOffset.top;
+
+        // this flage is true when the user is dragging the mouse
+        var isDown = false;
+
+        // these vars will hold the starting mouse position
+        var startX;
+        var startY;
+
+        var objZone, mouseX, mouseY;
+
+        function handleMouseDown(e) {
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            // save the starting x/y of the rectangle
+            startX = parseInt(e.clientX - offsetX);
+            startY = parseInt(e.clientY - offsetY);
+
+            // set a flag indicating the drag has begun
+            isDown = true;
+        }
+
+        function handleMouseUp(e) {
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            // the drag is over, clear the dragging flag
+            isDown = false;
+            addZone(objZone);
+            addZoneBox(objZone, e);
+            document.getElementById("canvas").remove();
+
+        }
+
+        function handleMouseOut(e) {
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            // the drag is over, clear the dragging flag
+            isDown = false;
+        }
+
+        function handleMouseMove(e) {
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            // if we're not dragging, just return
+            if (!isDown) {
+                return;
+            }
+
+            // get the current mouse position
+            mouseX = parseInt(e.clientX - offsetX);
+            mouseY = parseInt(e.clientY - offsetY);
+
+            // Put your mousemove stuff here
+
+            // clear the canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // calculate the rectangle width/height based
+            // on starting vs current mouse position
+            var width = mouseX - startX;
+            var height = mouseY - startY;
+
+            // draw a new rect from the start position 
+            // to the current mouse position
+            ctx.strokeRect(startX, startY, width, height);
+
+            objZone = {
+                x: startX + offsetX,
+                y: startY + offsetY,
+                width: width,
+                height: height,
+                sequence: getNextZoneSequence(),
+                canDelete: true,
+                zoneType: "point"
+            };
+        }
+
+        document.getElementById('canvas').addEventListener('mousedown', function (e) {
+            handleMouseDown(e);
+        });
+        document.getElementById('canvas').addEventListener('mousemove', function (e) {
+            handleMouseMove(e);
+        });
+        document.getElementById('canvas').addEventListener('mouseup', function (e) {
+            handleMouseUp(e);
+        });
+        document.getElementById('canvas').addEventListener('mouseout', function (e) {
+            handleMouseOut(e);
+        });
+
+    }
+    if (objType === "circle") {
+
+        const Canvas = document.createElement("canvas");
+        Canvas.id = "canvas";
+        Canvas.width = document.getElementById("image").width;
+        Canvas.height = document.getElementById("image").height;
+        Canvas.style.position = "absolute";
+        Canvas.style.top = "40px";
+        Canvas.style.left = "8px";
+        document.getElementById("main-body").appendChild(Canvas);
+
+        //Canvas
+        var canvas = document.getElementById('canvas');
+        var ctx = canvas.getContext('2d');
+
+        //Variables
+        var canvasOffset = canvas.getBoundingClientRect();
+        var canvasx = canvasOffset.left;
+        var canvasy = canvasOffset.top;
+
+        var last_mousex = last_mousey = 0;
+        var mousex = mousey = 0;
+        var mousedown = false;
+        var last_mousex, last_mousey, mousey, objZone;
+
+        //Mousedown
+        canvas.onmousedown = function (e) {
+            last_mousex = parseInt(e.clientX - canvasx);
+            last_mousey = parseInt(e.clientY - canvasy);
+            mousedown = true;
         };
 
-        addZone(objZone);
-        addZoneBox(objZone, _event);
+        //Mouseup
+        canvas.onmouseup = function (e) {
+            mousedown = false;
+            addZone(objZone);
+            addZoneBox(objZone, e);
+            // document.getElementById("canvas").remove();
+        };
+
+        //Mousemove
+        canvas.onmousemove = function (e) {
+            mousex = parseInt(e.clientX - canvasx);
+            mousey = parseInt(e.clientY - canvasy);
+            if (mousedown) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height); //clear canvas
+                //Save
+                ctx.save();
+                ctx.beginPath();
+                //Dynamic scaling
+                var scalex = 1 * ((mousex - last_mousex) / 2);
+                var scaley = 1 * ((mousey - last_mousey) / 2);
+                ctx.scale(scalex, scaley);
+                //Create ellipse
+                var centerx = (last_mousex / scalex) + 1;
+                var centery = (last_mousey / scaley) + 1;
+                ctx.arc(centerx, centery, 1, 0, 2 * Math.PI);
+                //Restore and draw
+                ctx.restore();
+                ctx.strokeStyle = 'blue';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                objZone = {
+                    x: mousex,
+                    y: mousey,
+                    width: scalex + centerx,
+                    height: scaley + centery,
+                    sequence: getNextZoneSequence(),
+                    canDelete: true,
+                    zoneType: "circle"
+                };
+            }
+
+        };
+
     }
+
     if (objType === "point") {
         const objZone = {
             x: _event.clientX,
@@ -60,50 +252,71 @@ function newZone(_event) {
         addZone(objZone);
         addZoneBox(objZone, _event);
     }
-    if (objType === "circle") {
-        const objZone = {
-            x: _event.clientX,
-            y: _event.clientY,
-            width: 75,
-            height: 75,
-            sequence: getNextZoneSequence(),
-            canDelete: true,
-            zoneType: "circle"
-        };
-        addZone(objZone);
-        addZoneBox(objZone, _event);
-    }
 
     objType = "";
 }
 
 // Draw the box on thge screen for given zone
 function addZoneBox(_objZone, _event) {
-    const theDiv = document.createElement("div");
+    let theDiv = null;
+    if (_objZone.zoneType === "ractangle") {
 
-    theDiv.className = _objZone.zoneType === "circle" ? "boxNotActive circle" : "boxNotActive";
 
-    theDiv.id = "box" + _objZone.sequence;
-    theDiv.style.position = "absolute";
-    theDiv.style.top =
-        _objZone.y +
-        (document.all ? document.body.scrollTop : pageYOffset) +
-        "px";
-    theDiv.style.left =
-        _objZone.x +
-        (document.all ? document.body.scrollLeft : pageXOffset) +
-        "px";
-    theDiv.style.width = _objZone.width + "px";
-    theDiv.style.height = _objZone.height + "px";
-    theDiv.style.zIndex = _objZone.sequence + 1;
-    theDiv.canDelete = _objZone.canDelete;
 
-    makeDraggable(theDiv, _objZone);
-    if (objType != "point") {
-        makeResizable(theDiv, _objZone);
+        theDiv = document.createElement("div");
+
+        theDiv.className = _objZone.zoneType === "circle" ? "boxNotActive circle" : "boxNotActive";
+
+        theDiv.id = "box" + _objZone.sequence;
+        theDiv.style.position = "absolute";
+        theDiv.style.top =
+            _objZone.y +
+            (document.all ? document.body.scrollTop : pageYOffset) +
+            "px";
+        theDiv.style.left =
+            _objZone.x +
+            (document.all ? document.body.scrollLeft : pageXOffset) +
+            "px";
+        theDiv.style.width = _objZone.width + "px";
+        theDiv.style.height = _objZone.height + "px";
+        theDiv.style.zIndex = _objZone.sequence + 1;
+        theDiv.canDelete = _objZone.canDelete;
+        makeDraggable(theDiv, _objZone);
+        if (objType != "point") {
+            makeResizable(theDiv, _objZone);
+        }
+
+        document.getElementById("main-body").appendChild(theDiv);
+    }
+    else {
+
+
+        theDiv = document.createElement("div");
+
+        theDiv.className = _objZone.zoneType === "circle" ? "boxNotActive circle" : "boxNotActive";
+
+        theDiv.id = "box" + _objZone.sequence;
+        theDiv.style.position = "absolute";
+        theDiv.style.top =
+            _objZone.y +
+            (document.all ? document.body.scrollTop : pageYOffset) +
+            "px";
+        theDiv.style.left =
+            _objZone.x +
+            (document.all ? document.body.scrollLeft : pageXOffset) +
+            "px";
+        theDiv.style.width = _objZone.width + "px";
+        theDiv.style.height = _objZone.height + "px";
+        theDiv.style.zIndex = _objZone.sequence + 1;
+        theDiv.canDelete = _objZone.canDelete;
+        makeDraggable(theDiv, _objZone);
+        if (objType != "point") {
+            makeResizable(theDiv, _objZone);
+        }
+
+        document.getElementById("main-body").appendChild(theDiv);
     }
 
-    document.getElementById("main-body").appendChild(theDiv);
 
     // const numberDiv = document.createElement("div");
     // numberDiv.innerHTML = _objZone.sequence;
