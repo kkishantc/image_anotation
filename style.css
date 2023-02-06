@@ -12,6 +12,9 @@
 .boxNotActive {
   border: 3px solid red;
 }
+.circle {
+  border-radius: 50%;
+}
 .box .boxNumber {
   display: none;
 }

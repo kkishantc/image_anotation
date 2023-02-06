@@ -32,25 +32,37 @@ function newZone(_event) {
             height: 75,
             sequence: getNextZoneSequence(),
             canDelete: true,
+            objType: "ractangle"
         };
 
         addZone(objZone);
-
         addZoneBox(objZone, _event);
     }
     if (objType === "point") {
         const objZone = {
             x: _event.clientX,
             y: _event.clientY,
-            width: 5,
-            height: 5,
+            width: 0,
+            height: 0,
             sequence: getNextZoneSequence(),
             canDelete: true,
+            objType: "point"
         };
         addZone(objZone);
-
         addZoneBox(objZone, _event);
-
+    }
+    if (objType === "circle") {
+        const objZone = {
+            x: _event.clientX,
+            y: _event.clientY,
+            width: 75,
+            height: 75,
+            sequence: getNextZoneSequence(),
+            canDelete: true,
+            objType: "circle"
+        };
+        addZone(objZone);
+        addZoneBox(objZone, _event);
     }
     objType = "";
 }
@@ -59,7 +71,8 @@ function newZone(_event) {
 function addZoneBox(_objZone, _event) {
     const theDiv = document.createElement("div");
 
-    theDiv.className = "boxNotActive";
+    theDiv.className = _objZone.objType === "circle" ? "boxNotActive circle" : "boxNotActive";
+
     theDiv.id = "box" + _objZone.sequence;
     theDiv.style.position = "absolute";
     theDiv.style.top =
@@ -70,23 +83,25 @@ function addZoneBox(_objZone, _event) {
         _objZone.x +
         (document.all ? document.body.scrollLeft : pageXOffset) +
         "px";
-    theDiv.style.width = _objZone.width;
-    theDiv.style.height = _objZone.height;
+    theDiv.style.width = _objZone.width + "px";
+    theDiv.style.height = _objZone.height + "px";
     theDiv.canDelete = _objZone.canDelete;
 
-    makeDraggable(theDiv);
-    makeResizable(theDiv);
+    makeDraggable(theDiv, _objZone);
+    if (objType != "point") {
+        makeResizable(theDiv);
+    }
 
     document.getElementById("main-body").appendChild(theDiv);
 
-    const numberDiv = document.createElement("div");
-    numberDiv.innerHTML = _objZone.sequence;
-    numberDiv.className = "boxNumber";
-    theDiv.appendChild(numberDiv);
+    // const numberDiv = document.createElement("div");
+    // numberDiv.innerHTML = _objZone.sequence;
+    // numberDiv.className = "boxNumber";
+    // theDiv.appendChild(numberDiv);
 }
 
 // Make element draggable
-function makeDraggable(_element) {
+function makeDraggable(_element, _objZone) {
     var pos1 = 0,
         pos2 = 0,
         pos3 = 0,
@@ -105,7 +120,8 @@ function makeDraggable(_element) {
         document.onmouseup = closeDragElement;
         // call a function whenever the cursor moves:
         document.onmousemove = elementDrag;
-        _element.className = "box";
+        _element.className = _objZone.objType === "circle" ? "box circle" : "box";
+
     }
 
     function elementDrag(e) {
@@ -128,7 +144,9 @@ function makeDraggable(_element) {
         /* stop moving when mouse button is released:*/
         document.onmouseup = null;
         document.onmousemove = null;
-        _element.className = "boxNotActive";
+
+        _element.className = _objZone.objType === "circle" ? "boxNotActive circle" : "boxNotActive";
+
 
         const objZone = getZoneFromBox(_element);
 
@@ -176,7 +194,8 @@ function makeResizable(_element) {
         );
         document.documentElement.addEventListener("mousemove", doDrag, false);
         document.documentElement.addEventListener("mouseup", stopDrag, false);
-        _element.className = "box";
+
+        _element.className = _objZone.objType === "circle" ? "box circle" : "box";
     }
 
     function doDrag(e) {
@@ -196,7 +215,8 @@ function makeResizable(_element) {
             stopDrag,
             false
         );
-        _element.className = "boxNotActive";
+
+        _element.className = _objZone.objType === "circle" ? "boxNotActive circle" : "boxNotActive";
 
         updateZone(getZoneFromBox(_element));
     }
