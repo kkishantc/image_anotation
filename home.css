@@ -1,6 +1,16 @@
 #canvas {
-  border: 1px solid red;
-  width: 100%;
-  height: auto;
   background-color: aquamarine;
+}
+
+.canvas-block {
+  width: 1000px;
+  height: 500px;
+  position: relative;
+}
+
+canvas {
+  position: absolute;
+  inset: 0px;
+  height: 100%;
+  width: 100%;
 }
