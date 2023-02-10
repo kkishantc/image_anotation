@@ -1,20 +1,46 @@
 var intHighest = 0;
 var objType = "";
+var allShapes = [];
+var mainBody = document.getElementById("main-body");
+
+function getMousePos(canvas, evt) {
+    var rect = canvas.getBoundingClientRect()
+    return {
+        x: (evt.clientX - rect.left) * canvas.width / rect.width,
+        y: (evt.clientY - rect.top) * canvas.height / rect.height,
+    };
+}
+
 function setType(_type) {
     objType = _type;
-    // if (objType === "clear") {
-    //   clearZone();
-    // }
+    console.log("objType: ", objType);
+    if (objType === "clear") {
+        clearZone();
+    }
+    if (objType === "erase") {
+        mainBody.onmousedown = null;
+        mainBody.onmouseup = null;
+        mainBody.onmousemove = null;
+
+        mainBody.onclick = (e) => {
+            const arrZones = getZones();
+            let mx = e.clientX;
+            let my = e.clientY;
+            let shape = arrZones.filter((value, index, array) => isMouseInShape(mx, my, value));
+            deleteZone(shape[0]);
+        }
+        objType = "";
+    }
 }
-// function clearZone() {
-//   const arrZones = getZones();
-//   console.log("arrZones :", arrZones);
-//   arrZones.forEach((element) => {
-//     const div = document.getElementById(`box${element.sequence}`);
-//     div.remove();
-//     removeZone(element);
-//   });
-// }
+
+function clearZone() {
+    const arrZones = getZones();
+    arrZones.forEach((element) => {
+        deleteZone(element);
+    });
+    console.log("allShapes :", allShapes);
+    objType = "";
+}
 
 // Get ratio (that is: 2 means original has twice the size; 1/2 means original has half the size)
 function getImageRatio(_imgElement) {
@@ -22,9 +48,7 @@ function getImageRatio(_imgElement) {
 }
 // User has clicked on the image so create a new zone
 
-
 document.getElementById("main-body").onclick = newZone;
-
 
 function newZone(_event) {
     console.log("objType :", objType);
@@ -34,8 +58,9 @@ function newZone(_event) {
             y: _event.clientY,
             width: 75,
             height: 75,
-            sequence: getNextZoneSequence(),
+            slug: getNextZoneSequence(),
             canDelete: true,
+            isShow: false,
             objType: "rectangle"
         };
 
@@ -46,9 +71,9 @@ function newZone(_event) {
         const objZone = {
             x: _event.clientX,
             y: _event.clientY,
-            width: 0,
-            height: 0,
-            sequence: getNextZoneSequence(),
+            width: 10,
+            height: 10,
+            slug: getNextZoneSequence(),
             canDelete: true,
             objType: "point"
         };
@@ -61,7 +86,7 @@ function newZone(_event) {
             y: _event.clientY,
             width: 75,
             height: 75,
-            sequence: getNextZoneSequence(),
+            slug: getNextZoneSequence(),
             canDelete: true,
             objType: "circle"
         };
@@ -71,13 +96,38 @@ function newZone(_event) {
     objType = "";
 }
 
-// Draw the box on thge screen for given zone
+function isMouseInShape(mx, my, shape) {
+    // if (shape.radius) {
+    //     // this is a circle
+    //     var dx = mx - shape.x;
+    //     var dy = my - shape.y;
+    //     // math test to see if mouse is inside circle
+    //     if (dx * dx + dy * dy < shape.radius * shape.radius) {
+    //         // yes, mouse is inside this circle
+    //         return (true);
+    //     }
+    // } else if (shape.width) {
+    // this is a rectangle
+    var rLeft = shape.x;
+    var rRight = shape.x + shape.width;
+    var rTop = shape.y;
+    var rBott = shape.y + shape.height;
+    // math test to see if mouse is inside rectangle
+    if (mx > rLeft && mx < rRight && my > rTop && my < rBott) {
+        return (true);
+    }
+    // }
+    // the mouse isn't in any of the shapes
+    return (false);
+}
+
+// Draw the box on the screen for given zone
 function addZoneBox(_objZone, _event) {
     const theDiv = document.createElement("div");
 
-    theDiv.className = _objZone.objType === "circle" ? "boxNotActive circle" : "boxNotActive";
+    theDiv.className = _objZone.objType === "circle" || _objZone.objType === "point" ? "boxNotActive circle" : "boxNotActive";
 
-    theDiv.id = "box" + _objZone.sequence;
+    theDiv.id = "box" + _objZone.slug;
     theDiv.style.position = "absolute";
     theDiv.style.top =
         _objZone.y +
@@ -93,25 +143,65 @@ function addZoneBox(_objZone, _event) {
 
     makeDraggable(theDiv, _objZone);
     if (objType != "point") {
-        makeResizable(theDiv);
+        makeResizable(theDiv, _objZone);
     }
 
     document.getElementById("main-body").appendChild(theDiv);
 
-    // const numberDiv = document.createElement("div");
-    // numberDiv.innerHTML = _objZone.sequence;
-    // numberDiv.className = "boxNumber";
-    // theDiv.appendChild(numberDiv);
+    //     const detailsDiv = document.createElement("div");
+    //     detailsDiv.style.position = "absolute";
+    //     // detailsDiv.style.display = _objZone.isShow ? "block" : "none";
+    //     detailsDiv.style.top = _objZone.width + 10 + "px";
+    //     detailsDiv.style.left = -4 + "px";
+    //     detailsDiv.id = "detailsBox" + _objZone.slug;
+    //     // let objStr = "'" + JSON.stringify(_objZone) + "'";
+    //     detailsDiv.className = "details";
+    //     detailsDiv.innerHTML = `<div id="popover4"> The changes in our brochure designs for 2013 require us to update key areas of our website. 
+    //         < h1 > Hii</h1 >   
+    //   </div > `;
+    //     theDiv.appendChild(detailsDiv);
+    //     detailsDiv.innerHTML = `<button style="display:none" type="button" id="exampleModalBtn${_objZone.slug}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+    //         Launch demo modal
+    //       </button>
+
+
+    //       <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    //   <div class="modal-dialog">
+    //     <div class="modal-content">
+    //       <div class="modal-header">
+    //         <h1 class="modal-title fs-5" id="staticBackdropLabel">Modal title</h1>
+    //         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    //       </div>
+    //       <div class="modal-body">
+    //         ...
+    //       </div>
+    //       <div class="modal-footer">
+    //         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+    //         <button type="button" class="btn btn-primary">Understood</button>
+    //       </div>
+    //     </div>
+    //   </div>
+    // </div>`;
+
 }
 
 // Make element draggable
 function makeDraggable(_element, _objZone) {
+    console.log("makeDraggable")
     var pos1 = 0,
         pos2 = 0,
         pos3 = 0,
         pos4 = 0;
 
+    // let ele = document.getElementById("detailsBox" + _objZone.slug)
+    // console.log("ele: ", ele);    
+    // if (objType === "") {
+    //     _element.addEventListener('mousedown', (e) => handelOpenModel(e, _element, _objZone));
+    // }
+
+    // if (_objZone.isShow === false) {
     _element.onmousedown = dragMouseDown;
+    // }
 
     function dragMouseDown(e) {
         e = e || window.event;
@@ -124,7 +214,7 @@ function makeDraggable(_element, _objZone) {
         document.onmouseup = closeDragElement;
         // call a function whenever the cursor moves:
         document.onmousemove = elementDrag;
-        _element.className = _objZone.objType === "circle" ? "box circle" : "box";
+        _element.className = _objZone.objType === "circle" || _objZone.objType === "point" ? "box circle" : "box";
 
     }
 
@@ -142,7 +232,7 @@ function makeDraggable(_element, _objZone) {
         // set the element's new position:
         _element.style.top = _element.offsetTop - pos2 + "px";
         _element.style.left = _element.offsetLeft - pos1 + "px";
-        console.log("objZone", _objZone)
+
     }
 
     function closeDragElement() {
@@ -150,7 +240,7 @@ function makeDraggable(_element, _objZone) {
         document.onmouseup = null;
         document.onmousemove = null;
 
-        _element.className = _objZone.objType === "circle" ? "boxNotActive circle" : "boxNotActive";
+        _element.className = _objZone.objType === "circle" || _objZone.objType === "point" ? "boxNotActive circle" : "boxNotActive";
 
 
         const objZone = getZoneFromBox(_element);
@@ -163,8 +253,8 @@ function makeDraggable(_element, _objZone) {
     }
 }
 
-// Make eleemnt resizable by adding dummy divs to the right and to the bottom of element
-function makeResizable(_element) {
+// Make element resizable by adding dummy dives to the right and to the bottom of element
+function makeResizable(_element, _objZone) {
     var startX, startY, startWidth, startHeight;
 
     var right = document.createElement("div");
@@ -189,18 +279,18 @@ function makeResizable(_element) {
         startX = e.clientX;
         startY = e.clientY;
         e.stopPropagation();
-        startWidth = parseInt(
+        startWidth = parseFloat(
             document.defaultView.getComputedStyle(_element).width,
             10
         );
-        startHeight = parseInt(
+        startHeight = parseFloat(
             document.defaultView.getComputedStyle(_element).height,
             10
         );
         document.documentElement.addEventListener("mousemove", doDrag, false);
         document.documentElement.addEventListener("mouseup", stopDrag, false);
 
-        _element.className = _objZone.objType === "circle" ? "box circle" : "box";
+        _element.className = _objZone.objType === "circle" || _objZone.objType === "point" ? "box circle" : "box";
     }
 
     function doDrag(e) {
@@ -221,31 +311,34 @@ function makeResizable(_element) {
             false
         );
 
-        _element.className = _objZone.objType === "circle" ? "boxNotActive circle" : "boxNotActive";
+        _element.className = _objZone.objType === "circle" || _objZone.objType === "point" ? "boxNotActive circle" : "boxNotActive";
 
         updateZone(getZoneFromBox(_element));
     }
 }
 
+// initZones();
 // Initialize all the zones for the current page
 function initZones() {
-    getZones().forEach((objZone) => {
+    // allShapes.push({ width: 83.0, height: 82.7, y: 146.7, x: 191.1, type: "rectangle", slug: 0 })
+    // allShapes = JSON.parse(localStorage.getItem("allShapes")) || [];
+    allShapes?.forEach((objZone) => {
         addZoneBox(objZone);
     });
 }
 
-// Get the next sequence (by adding 1 to the highest sequence so far)
+// Get the next slug (by adding 1 to the highest slug so far)
 function getNextZoneSequence() {
-    return intHighest++;
+    return Math.floor(Math.random().toFixed(5) * 100000);
 }
 
 // User has selected a box on the screen, get the associated objZone
 function getZoneFromBox(_element) {
-    const intSequence = parseInt(_element.id.replace("box", ""));
+    const intSequence = parseFloat(_element.id.replace("box", ""));
     var objReturn = null;
 
     getZones().forEach((objZone) => {
-        if (objZone.sequence == intSequence) {
+        if (objZone.slug == intSequence) {
             objReturn = objZone;
 
             // Make sure coordinates still in line with image on the screen
@@ -278,25 +371,87 @@ function zoneOutsideImage(_objZone) {
 // Get pixels from a style
 function getX(_x) {
     try {
-        const intReturn = parseInt(_x.replace("px", ""));
+        const intReturn = parseFloat(_x.replace("px", ""));
         return intReturn;
     } catch (error) {
         return 0;
     }
 }
 
+
+// $('#show-div').click(function () {
+//     $('#hidden-content').toggle();
+// });
+
+function handelOpenModel(e, ele, obj) {
+    console.log("opening model.", obj.slug);
+
+    // if (obj.isShow === false) {
+    //     obj.isShow = true;
+    //     updateZone(obj);
+    //     console.log("opening model.");
+    //     // let child = document.getElementById("exampleModalBtn" + obj.slug)
+    //     let child = document.getElementById("detailsBox" + obj.slug)
+    //     // console.log(child);
+    //     // child.click();
+    //     child.style.display = "block";
+    // }
+    // else {
+    //     handelCloseModel(ele, obj);
+    // }
+}
+
+function handelCloseModel(ele, obj) {
+    if (obj.isShow === true) {
+        let child = document.getElementById("detailsBox" + obj.slug)
+        child.style.display = "none";
+        obj.isShow = false;
+        updateZone(obj);
+        console.log("closing model.");
+    }
+}
+
+function handelClick(seq) {
+
+}
+function handelClose(obj) {
+    // handelCloseModel(obj);
+    // console.log(obj);
+    console.log("handelClose");
+}
+
+
+// document.addEventListener("click",handelCloseModel)
+
 // Replace zone with zone passed as parameter
 function updateZone(_objZone) {
+
+
     const arrZones = new Array();
 
     getZones().forEach((objZone) => {
-        if (objZone.sequence == _objZone.sequence) {
+        if (objZone.slug == _objZone.slug) {
             arrZones.push(_objZone);
         } else {
             arrZones.push(objZone);
         }
     });
-
+    allShapes = arrZones;
+    console.log("updateZone allShapes: ", allShapes)
+    // for (const iterator of detailsBoxes) {
+    //     // console.log("iterator: ", )
+    //     iterator.onclick = (e) => {
+    //         handelOpenModel(e, iterator)
+    //     }
+    // let ele = document.getElementById("detailsBox" + _objZone.slug)
+    // console.log("ele: ", ele);
+    // ele.addEventListener('click', handelOpenModel)
+    // ele.addEventListener("onmousedown", (e) => handelOpenModel(e, ele));
+    // ele.addEventListener("onmouseup", (e) => handelCloseModel(e, ele));
+    // }
+    // detailsBoxes.forEach((item) => {
+    // })
+    // localStorage.setItem("allShapes", JSON.stringify(arrZones));
     saveZones(arrZones);
 }
 
@@ -305,14 +460,15 @@ function deleteZone(_objZone) {
     const arrZones = new Array();
 
     getZones().forEach((objZone) => {
-        if (objZone.sequence != _objZone.sequence) {
+        if (objZone.slug != _objZone.slug) {
             arrZones.push(objZone);
         }
     });
 
+    allShapes = arrZones;
     saveZones(arrZones);
 
-    document.getElementById("box" + _objZone.sequence).remove();
+    document.getElementById("box" + _objZone.slug).remove();
 }
 
 // Add a zone to zone collection
@@ -320,16 +476,19 @@ function addZone(_objZone) {
     const arrZones = getZones();
 
     arrZones.push(_objZone);
-
+    allShapes = arrZones;
+    console.log("addZone allShapes: ", allShapes)
+    // localStorage.setItem("allShapes", JSON.stringify(allShapes));
     saveZones(
         arrZones.sort(function (a, b) {
-            a.sequence - b.sequence;
+            a.slug - b.slug;
         })
     );
 }
 
 // Save zone collection in the field that is submitted
 function saveZones(_arr) {
+
     var strZones = "";
     const elImage = document.getElementById("image");
     const dblRatio = getImageRatio(elImage);
@@ -340,15 +499,15 @@ function saveZones(_arr) {
         }
 
         strZones +=
-            parseInt((objZone.x - getElementPosition(elImage).x) * dblRatio) +
+            parseFloat((objZone.x - getElementPosition(elImage).x) * dblRatio) +
             " " +
-            parseInt((objZone.y - getElementPosition(elImage).y) * dblRatio) +
+            parseFloat((objZone.y - getElementPosition(elImage).y) * dblRatio) +
             " " +
-            parseInt(objZone.width * dblRatio) +
+            parseFloat(objZone.width * dblRatio) +
             " " +
-            parseInt(objZone.height * dblRatio) +
+            parseFloat(objZone.height * dblRatio) +
             " " +
-            objZone.sequence;
+            objZone.slug;
     });
 
     document.getElementsByName("ctrZones")[0].value = strZones;
@@ -368,13 +527,11 @@ function getZones() {
                 .filter((e) => e.trim().length > 0);
 
             arrZones.push({
-                x:
-                    parseInt(arrTokens[0] / dblRatio) + getElementPosition(elImage).x,
-                y:
-                    parseInt(arrTokens[1] / dblRatio) + getElementPosition(elImage).y,
-                width: parseInt(arrTokens[2] / dblRatio),
-                height: parseInt(arrTokens[3] / dblRatio),
-                sequence: arrTokens[4],
+                x: parseFloat(arrTokens[0] / dblRatio) + getElementPosition(elImage).x,
+                y: parseFloat(arrTokens[1] / dblRatio) + getElementPosition(elImage).y,
+                width: parseFloat(arrTokens[2] / dblRatio),
+                height: parseFloat(arrTokens[3] / dblRatio),
+                slug: arrTokens[4],
             });
         }
     });

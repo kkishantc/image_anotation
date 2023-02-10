@@ -2,23 +2,24 @@
   margin: 10px 0px;
 }
 .imagePortrait {
-  height: 300px;
-  width: 100%;
+  /* height: auto;
+  width: auto; */
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
-.box {
+/* .box {
   border: 1px solid rgb(49, 156, 0);
-}
-.box:focus {
+} */
+/* .box:focus {
   border: 1px solid rgb(223, 70, 70);
-}
+} */
 
-.box:active {
+/* .box:active {
   border: 1px solid rgb(17, 0, 255);
-}
+} */
 
-.boxNotActive {
+.boxNotActive,
+.box {
   border: 3px solid red;
 }
 
@@ -65,4 +66,8 @@
   right: 0;
   bottom: 0;
   cursor: nw-resize;
+}
+
+.details {
+  border: 1px solid pink;
 }

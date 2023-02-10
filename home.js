@@ -8,10 +8,15 @@ var canvasDraw = document.getElementById("canvas2");
 var contextMain = canvasMain.getContext("2d");
 var contextDraw = canvasDraw.getContext("2d");
 
-contextMain.canvas.width = window.innerWidth;
-contextMain.canvas.height = window.innerHeight;
-contextDraw.canvas.width = window.innerWidth;
-contextDraw.canvas.height = window.innerHeight;
+// contextMain.canvas.width = window.innerWidth;
+// contextMain.canvas.height = window.innerHeight;
+// contextDraw.canvas.width = window.innerWidth;
+// contextDraw.canvas.height = window.innerHeight;
+
+contextMain.canvas.width = 498;
+contextMain.canvas.height = 340;
+contextDraw.canvas.width = 498;
+contextDraw.canvas.height = 340;
 
 // style the context
 contextMain.strokeStyle = "red";
@@ -19,8 +24,56 @@ contextMain.lineWidth = 5;
 
 // contextDraw.strokeStyle = "blue";
 contextDraw.fillStyle = "blue";
-contextDraw.lineWidth = 2;
+contextDraw.lineWidth = 1;
 // contextDraw.setLineDash([15]);
+
+
+// drawRect(contextDraw, 100, 100, 50, 50);
+// drawEllipse(contextDraw, 185.6, 183.2, 155.8, 73.8)
+// drawPoint(contextDraw, 50, 50, 5);
+
+// function drawPoint(ctx, x, y, r) {
+//     ctx.fillStyle = "black"
+//     ctx.beginPath();
+//     ctx.arc(x, y, r, 0, 2 * Math.PI);
+//     ctx.fill();
+// }
+
+function drawRect(ctx, x, y, w, h) {
+    ctx.beginPath();
+    ctx.rect(x, y, w, h);
+    ctx.closePath();
+    ctx.stroke();
+}
+
+function drawEllipse(ctx, x, y, w, h) {
+    var kappa = .5522848,
+        ox = (w / 2) * kappa, // control point offset horizontal
+        oy = (h / 2) * kappa, // control point offset vertical
+        xe = x + w,           // x-end
+        ye = y + h,           // y-end
+        xm = x + w / 2,       // x-middle
+        ym = y + h / 2;       // y-middle
+
+    ctx.beginPath();
+    ctx.moveTo(x, ym);
+    ctx.bezierCurveTo(x, ym - oy, xm - ox, y, xm, y);
+    ctx.bezierCurveTo(xm + ox, y, xe, ym - oy, xe, ym);
+    ctx.bezierCurveTo(xe, ym + oy, xm + ox, ye, xm, ye);
+    ctx.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym);
+    ctx.closePath(); // not used correctly, see comments (use to close off open path)
+    ctx.stroke();
+}
+
+// console.log("_shape: ", _shape);
+// let { x: mx, y: my } = getMousePosFromPercentage(_shape.x, _shape.y);
+// let { x: width, y: height } = getMousePosFromPercentage(_shape.width, _shape.height);
+// console.log("shape: ", mx, my, width, height);
+
+// contextDraw.beginPath();
+// contextDraw.rect(mx, my, width, height);
+// contextDraw.closePath();
+// contextDraw.stroke();
 
 function draw() {
 
@@ -31,9 +84,9 @@ function draw() {
 
     // used to calc canvas position relative to window
     function reOffset() {
-        var BB = canvas.getBoundingClientRect();
-        offsetX = BB.left;
-        offsetY = BB.top;
+        // var BB = canvas.getBoundingClientRect();
+        offsetX = canvasDraw.offsetLeft;
+        offsetY = canvasDraw.offsetTop;
     }
 
     var offsetX, offsetY;
@@ -44,9 +97,9 @@ function draw() {
     canvas.onresize = function (e) { reOffset(); }
 
     // save relevant information about shapes drawn on the canvas
-    var shapes = allShapes;
-
-
+    // var shapes = allShapes;
+    // let shape = { type: "rectangle", x: 44.4335308197074, y: 65.08205396533613, width: 82.40283303571428, height: 111.47475000000009, _id: `shape-${cnt}` }
+    // shapes.push([...shapes, shape])
 
     // drag related vars
     var isDragging = false;
@@ -67,6 +120,7 @@ function draw() {
     // given mouse X & Y (mx & my) and shape object
     // return true/false whether mouse is inside the shape
     function isMouseInShape(mx, my, shape) {
+
         if (shape.radius) {
             // this is a circle
             var dx = mx - shape.x;
@@ -96,12 +150,12 @@ function draw() {
         e.preventDefault();
         e.stopPropagation();
         // calculate the current mouse position
-        startX = parseInt(e.clientX - offsetX);
-        startY = parseInt(e.clientY - offsetY);
+        startX = (e.clientX - offsetX);
+        startY = (e.clientY - offsetY);
         // test mouse position against all shapes
         // post result if mouse is in a shape
-        for (var i = 0; i < shapes.length; i++) {
-            if (isMouseInShape(startX, startY, shapes[i])) {
+        for (var i = 0; i < allShapes.length; i++) {
+            if (isMouseInShape(startX, startY, allShapes[i])) {
                 // the mouse is inside this shape
                 // select this shape
                 selectedShapeIndex = i;
@@ -141,16 +195,17 @@ function draw() {
         e.preventDefault();
         e.stopPropagation();
         // calculate the current mouse position         
-        // mouseX = parseInt(e.clientX - offsetX);
-        // mouseY = parseInt(e.clientY - offsetY);
-        // mouseX = parseInt(e.clientX - offsetX);
-        // mouseY = parseInt(e.clientY - offsetY);
+        mouseX = (e.clientX - offsetX);
+        mouseY = (e.clientY - offsetY);
+        // mouseX = (e.clientX - offsetX);
+        // mouseY = (e.clientY - offsetY);
         // how far has the mouse dragged from its previous mousemove position?
-        var dx = mouseX - selectedShape.x;
-        var dy = mouseY - selectedShape.y;
+        var dx = mouseX - startX;
+        var dy = mouseY - startY;
 
         // move the selected shape by the drag distance
-        var selectedShape = shapes[selectedShapeIndex];
+        var selectedShape = allShapes[selectedShapeIndex];
+        console.log("selectedShape: ", selectedShape);
         selectedShape.x += dx;
         selectedShape.y += dy;
         console.log("mouseX, mousey: ", mouseX, mouseY, "selectedShape.x , selectedShape.y ", selectedShape.x, selectedShape.y)
@@ -164,21 +219,43 @@ function draw() {
     // clear the canvas and 
     // redraw all shapes in their current positions
     function drawAll() {
-        contextMain.clearRect(0, 0, cw, ch);
+        // console.log(drawAll);
+        // contextMain.clearRect(0, 0, cw, ch);
         contextDraw.clearRect(0, 0, cw, ch);
-        for (var i = 0; i < shapes.length; i++) {
-            var shape = shapes[i];
-            if (shape.type === "rectangle") {
-                // ctx.fillRect(shape.x, shape.y, shape.width, shape.height);
-                contextMain.beginPath();
-                contextMain.rect(shape.x, shape.y, shape.width, shape.height);
-                contextMain.closePath();
-                contextMain.stroke();
+
+        for (var i = 0; i < allShapes.length; i++) {
+            var shape = allShapes[i];
+            make_base();
+            // if (shape.type === "rectangle") {
+            //     let _shape = { height: 27.940000000000005, type: "rectangle", width: 28.70035807291666, x: 53.49256727430556, y: 30.76249875199681, _id: "shape-0" };
+            //     console.log("_shape: ", _shape);
+            //     let { x: mx, y: my } = getMousePosFromPercentage(_shape.x, _shape.y);
+            //     let { x: width, y: height } = getMousePosFromPercentage(_shape.width, _shape.height);
+            //     console.log("shape: ", mx, my, width, height);
+            //     // contextMain.beginPath();
+            //     // contextMain.rect(mx, my, width, height);
+            //     // contextMain.closePath();
+            //     // contextMain.stroke();
+
+            //     contextDraw.beginPath();
+            //     contextDraw.rect(mx, my, width, height);
+            //     contextDraw.closePath();
+            //     contextDraw.stroke();
+            // }
+            // if (shape.type === "circle") {
+
+            // }
+            if (shape.type === "point") {
+                // contextMain.beginPath();
+                // contextMain.arc(shape.x, shape.y, shape.radius, 0, 2 * Math.PI);
+                // contextMain.stroke();
 
                 contextDraw.beginPath();
-                contextDraw.rect(shape.x, shape.y, shape.width, shape.height);
-                contextDraw.closePath();
-                contextMain.stroke();
+                contextDraw.fillStyle = "black"
+                let { x, y } = getMousePosFromPercentage(shape.x, shape.y)
+                contextDraw.arc(x, y, shape.radius, 0, 2 * Math.PI);
+                contextDraw.stroke();
+                contextDraw.fill()
             }
 
         }
@@ -284,10 +361,8 @@ function draw() {
 
 function setType(_objectType) {
     console.log("_objectType", _objectType)
-
     if (_objectType === "rectangle") {
         objectType = _objectType;
-        drawRectangle();
     } else if (_objectType === "circle") {
         objectType = _objectType;
         drawCircle();
@@ -303,13 +378,57 @@ function setType(_objectType) {
 
 function getMousePos(canvas, evt) {
     var rect = canvas.getBoundingClientRect()
+    console.log(evt)
+    console.log(rect)
+    let x = (evt.clientX - rect.left) * canvas.width / rect.width;
+    let y = (evt.clientY - rect.top) * canvas.height / rect.height;
+    console.log("x,y: ", x, y)
+
     return {
-        x: (evt.clientX - rect.left) * canvas.width / rect.width,
-        y: (evt.clientY - rect.top) * canvas.height / rect.height,
+        x, y
     };
 }
 
+function getMousePosInPercentage(startX, startY) {
+    // xPercent = parseFloat(startX / canvasMain.width * 100);
+    // yPercent = parseFloat(startY / canvasMain.height * 100);
+    xPercent = parseFloat(startX / canvasMain.width * 100);
+    yPercent = parseFloat(startY / canvasMain.height * 100);
+    return { x: xPercent, y: yPercent };
+}
 
+function getMousePosFromPercentage(startX, startY) {
+    console.log("getMousePosFromPercentage: ", startX, startY)
+    // xPercent = parseFloat(startX / 100 * canvasMain.width);
+    // yPercent = parseFloat(startY / 100 * canvasMain.height);
+    orgX = parseFloat(startX / 100 * canvasMain.width);
+    orgY = parseFloat(startY / 100 * canvasMain.height);
+    console.log("getMousePosFromPercentage: ", orgX, orgY)
+    return { x: orgX, y: orgY };
+}
+
+// function getSizeInToPercentage(w, h) {
+//     return {
+//         w: parseFloat(w/100),
+//         h: parseFloat(),
+//     }
+// }
+
+// function getMousePosInPercentage(clientX, clientY) {
+//     console.log("canvasMain.width, canvasMain.height", window.screen.width, window.screen.height);
+//     return {
+//         x: (clientX / window.screen.width) * 100,
+//         y: (clientY / window.screen.height) * 100,
+//     };
+// }
+
+// function percentageIntoPosition(clientX, clientY) {
+//     console.log("clientX, clientY:  ", clientX, clientY)
+//     return {
+//         x: (clientX / 100) * window.screen.width,
+//         y: (clientY / 100) * window.screen.height,
+//     };
+// }
 
 function drawRectangle() {
     context = contextDraw;
@@ -317,16 +436,27 @@ function drawRectangle() {
 
     function startRect(e) {
         start = getMousePos(canvas, e);
+        console.log(start)
+        console.log("start: ", start);
         // canvasDraw.style.opacity = 1;
     }
 
     function endRect(e) {
         let { x, y } = getMousePos(canvas, e)
-        let shape = { type: "rectangle", x: start.x, y: start.y, width: x - start.x, height: y - start.y, _id: `shape-${cnt}` }
+        console.log("start in px: ", start);
+        // let { x: mx, y: my } = getMousePosInPercentage(start.x, start.y, e);
+        // console.log("start in %: ", mx, my);
+        let { x: startX, y: startY } = getMousePosInPercentage(start.x, start.y)
+        let { x: width, y: height } = getMousePosInPercentage(x - start.x, y - start.y)
+        let shape = { type: "rectangle", x: startX, y: startY, width, height, _id: `shape-${cnt}` }
         allShapes.push(shape);
         tempShape = { ...shape };
-        console.log("allShapes: ", allShapes);
+        console.log("allShapes: ", shape);
         cnt++;
+        contextDraw.beginPath();
+        contextDraw.rect(shape.x, shape.y, shape.width, shape.height);
+        contextDraw.closePath();
+        contextDraw.stroke();
         draw();
         // context.clearRect(0, 0, canvas.width, canvas.height);
         // canvasDraw.style.opacity = 0;
@@ -362,6 +492,16 @@ function drawRectangle() {
     canvasDraw.onmousemove = drawMove;
 }
 
+function drawOval(x, y, startX, startY) {
+    contextDraw.clearRect(0, 0, canvasDraw.width, canvasDraw.height);
+    contextDraw.beginPath();
+    contextDraw.moveTo(startX, startY + (y - startY) / 2);
+    contextDraw.bezierCurveTo(startX, startY, x, startY, x, startY + (y - startY) / 2);
+    contextDraw.bezierCurveTo(x, y, startX, y, startX, startY + (y - startY) / 2);
+    contextDraw.closePath();
+    contextDraw.stroke();
+}
+
 function drawCircle() {
 
     var offsetX = canvasDraw.offsetLeft;
@@ -371,15 +511,6 @@ function drawCircle() {
     var mouseY, mouseX;
     var isDown = false;
 
-    function drawOval(x, y) {
-        contextDraw.clearRect(0, 0, canvasDraw.width, canvasDraw.height);
-        contextDraw.beginPath();
-        contextDraw.moveTo(startX, startY + (y - startY) / 2);
-        contextDraw.bezierCurveTo(startX, startY, x, startY, x, startY + (y - startY) / 2);
-        contextDraw.bezierCurveTo(x, y, startX, y, startX, startY + (y - startY) / 2);
-        contextDraw.closePath();
-        contextDraw.stroke();
-    }
 
     function handleMouseDown(e) {
 
@@ -404,7 +535,7 @@ function drawCircle() {
         cnt++;
 
         draw();
-        contextDraw.clearRect(0, 0, canvasDraw.width, canvasDraw.height);
+        // contextDraw.clearRect(0, 0, canvasDraw.width, canvasDraw.height);
         objectType = "";
 
     }
@@ -427,7 +558,7 @@ function drawCircle() {
         let { x, y } = getMousePos(canvasDraw, e)
         mouseX = x;
         mouseY = y;
-        drawOval(mouseX, mouseY);
+        drawOval(mouseX, mouseY, startX, startY);
     }
 
     canvasDraw.onmouseup = function (e) {
@@ -450,23 +581,17 @@ function drawCircle() {
         }
     });
 
-
-
 }
 
 function drawPoint(e) {
-    function getMousePos(canvas, evt) {
-        var rect = canvas.getBoundingClientRect()
-        return {
-            x: (evt.clientX - rect.left) * canvas.width / rect.width,
-            y: (evt.clientY - rect.top) * canvas.height / rect.height,
-        };
-    }
+
 
     function handleMouseClick(e) {
         var mousePos = getMousePos(canvasDraw, e);
-
-        allShapes.push({ type: "point", x: mousePos.x, y: mousePos.y, _id: `shape-${cnt}` });
+        console.log("x, y: ", mousePos.x, mousePos.y);
+        let { x, y } = getMousePosInPercentage(mousePos.x, mousePos.y);
+        console.log("x, y: ", x, y);
+        allShapes.push({ type: "point", x, y, radius: 5, _id: `shape-${cnt}` });
         console.log("allShapes: ", allShapes);
         cnt++;
         draw();
@@ -554,13 +679,25 @@ function drawPoint(e) {
 // }
 
 // draw image
-make_base()
+
+
+make_base();
+
 
 function make_base() {
-    canvasMain.style.backgroundImage = "url('./images.jpeg')";
-    canvasMain.style.backgroundRepeat = "no-repeat";
-    canvasMain.style.backgroundSize = "contain";
-    canvasMain.style.backgroundAttachment = "fixed";
+    var image = new Image();
+    image.src = "https://cdn.pixabay.com/photo/2015/11/16/14/43/cat-1045782__340.jpg"
+    // image.src = "https://c4.wallpaperflare.com/wallpaper/41/681/303/pc-hd-1080p-nature-1920x1080-wallpaper-preview.jpg"
+    console.log("image.width, image.height: ", image.width, image.height);
+    console.log("image.naturalWidth, image.naturalHeight: ", image.naturalWidth, image.naturalHeight);
+    contextMain.drawImage(image, 0, 0, canvasMain.width, canvasMain.height);
+    // let imgData = 
+    // let block = document.getElementsByClassName("canvas-block");
+    // console.log(block)
+    // block.style.set = "url('./cat.jpg')";
+    // block.style.backgroundRepeat = "no-repeat";
+    // block.style.backgroundSize = "contain";
+    // block.style.backgroundAttachment = "fixed";
 
 }
 
