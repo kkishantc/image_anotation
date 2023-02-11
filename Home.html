@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Image Annotation</title>
+    <link rel="stylesheet" href="./home.css" />
+    <!-- <script
+      type="text/javascript"
+      src="https://code.jquery.com/jquery.min.js"
+    ></script> -->
+  </head>
+  <body>
+    <div class="controls">
+      <button onclick="setType('rectangle')">Rectangle</button>
+      <button onclick="setType('circle')">Circle</button>
+      <button onclick="setType('point')">Point</button>
+      <button onclick="setType('erase')">Erase</button>
+      <button onclick="setType('clear')">Clear</button>
+      <button onclick="setType('rotate')">Rotate</button>
+    </div>
+    <div class="canvas-block">
+      <canvas id="canvas"></canvas>
+      <canvas id="canvas2"></canvas>
+    </div>
+  </body>
+  <script src="./home.js"></script>
+</html>
