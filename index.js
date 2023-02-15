@@ -1,4 +1,5 @@
 var intHighest = 0;
+var zoomLevel = 1;
 var eventType = "";
 var allShapes = [];
 var allDetails = [];
@@ -29,15 +30,27 @@ function setType(_type) {
     if (eventType === "rotate") {
         rotateImage(mainBody);
     }
+    if (eventType === "zoomIn") {
+        zoomIn(mainBody);
+    }
+    if (eventType === "zoomOut") {
+        zoomOut(mainBody);
+    }
+    if (eventType === "zoomReset") {
+        zoomReset(mainBody);
+    }
 }
 
 function rotateImage(mainBody) {
-    let container = document.getElementById("container");
-    container.style.transform = `rotate(${rotationAngle}deg)`;
+    let container = document.getElementById("main-body");
     container.style.transformOrigin = "50% 73%";
+    container.style.transform = `rotate(${rotationAngle}deg)`;
     rotationAngle += 90;
     if (rotationAngle >= 360) {
         rotationAngle = 0;
+    }
+    if (selectedId != null) {
+        closePopOver(selectedId);
     }
 }
 
@@ -61,6 +74,27 @@ function clearZone() {
 
     let popover = document.getElementById("popover");
     popover.style.display = "none";
+}
+
+function zoomIn(ele) {
+    zoomLevel += 0.1;
+    console.log("zoomLevel: ", zoomLevel)
+    ele.style.transform = `scale(${zoomLevel})`;
+    ele.style.transformOrigin = "0% 0%";
+}
+
+function zoomOut(ele) {
+    console.log("zoomLevel: ", zoomLevel)
+    if (zoomLevel >= 0.2) {
+        zoomLevel -= 0.1;
+        ele.style.transform = `scale(${zoomLevel})`;
+        ele.style.transformOrigin = "0% 0%";
+    }
+}
+
+function zoomReset(ele) {
+    zoomLevel = 1;
+    ele.style.transform = `scale(1)`;
 }
 
 // Get ratio (that is: 2 means original has twice the size; 1/2 means original has half the size)
@@ -614,18 +648,19 @@ function selectBox(ID) {
             link.style.color = '#0a58ca';
             link.style.textDecoration = 'underline';
 
-            // const links = document.querySelectorAll(".link" + ID);
-            // links.forEach(link => {
-            //     link.style.color = "black";
-            // });
-
-            // const link = document.getElementById("link" + selectedId);
-            // link.style.color = "#0a58ca";
-
             openPopOver(selectedId);
         }
     }
 }
+
+function getRotationAngle(ele) {
+    const style = window.getComputedStyle(ele);
+    const transform = style.getPropertyValue("transform");
+    const matrix = transform.substr(7).split(",");
+    const angle = Math.round(Math.atan2(matrix[1], matrix[0]) * (180 / Math.PI));
+    return angle;
+}
+
 
 // open popover
 function openPopOver(_selectedId) {
@@ -634,11 +669,27 @@ function openPopOver(_selectedId) {
     let { x, y } = PercentageToPx(_shape.x, _shape.y);
     let { x: width, y: height } = PercentageToPx(_shape?.width, _shape?.height);
 
+    let angle = getRotationAngle(mainBody);
+    console.log("angle: ", angle);
     let popover = document.getElementById("popover");
     popover.style.display = "block";
     popover.style.position = "absolute";
-    popover.style.top = y + height + "px";
-    popover.style.left = x + "px";
+
+    if (angle === 0 || Number.isNaN(angle)) {
+        popover.style.transform = `rotate(0deg)`;
+        popover.style.top = y + height + "px";
+        popover.style.left = x + "px";
+    }
+    else if (angle === 90) {
+        popover.style.transform = `rotate(270deg)`;
+        popover.style.top = y - width + "px";
+        popover.style.left = x + width - 25 + "px";
+    }
+    else if (angle === 180) {
+        popover.style.transform = `rotate(180deg)`;
+        popover.style.top = y - width - height + "px";
+        popover.style.left = x + "px";
+    }
 
     const ul = document.getElementById("details-list");
     ul.innerHTML = "";
@@ -729,7 +780,7 @@ function generateList() {
     })
 }
 
-function handelListItemClick(ID) {
-    console.log("handelListItemClick");
-    // selectBox(ID);
+function handelListItemClick(e) {
+    let id = e.target.id.toString().replace("link", "");
+    selectBox(id);
 }

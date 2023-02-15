@@ -38,16 +38,28 @@
             Circle
           </button>
           <button class="control-btn" onclick="setType('point')">Point</button>
-          <!-- <button class="control-btn" onclick="setType('rotate')">Rotate</button> -->
+
           <button class="control-btn" onclick="setType('clear')">
             Clear All
           </button>
           <button class="control-btn" onclick="setType('erase')">Erase</button>
+          <button class="control-btn" onclick="setType('zoomIn')">
+            Zoom In
+          </button>
+          <button class="control-btn" onclick="setType('zoomReset')">
+            Zoom Reset
+          </button>
+          <button class="control-btn" onclick="setType('zoomOut')">
+            Zoom Out
+          </button>
+          <button class="control-btn" onclick="setType('rotate')">
+            Rotate
+          </button>
         </div>
         <div style="display: none">
           <textarea name="ctrZones"></textarea>
         </div>
-        <div id="container">
+        <div id="container" class="">
           <div id="main-body" style="position: relative">
             <!-- <img src="./images.jpeg" id="image" class="imagePortrait" /> -->
             <img
@@ -96,7 +108,7 @@
           </div>
         </div>
       </div>
-      <div class="mx-3">
+      <div class="mx-3 z-1">
         <div class="all-list">
           <span>Annotation List</span>
           <ul id="annotationList"></ul>
