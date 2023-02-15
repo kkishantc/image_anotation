@@ -2,8 +2,6 @@
   margin: 10px 0px;
 }
 .imagePortrait {
-  /* height: auto;
-  width: auto; */
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
@@ -14,10 +12,6 @@
 .boxNotActive:hover,
 .box:hover {
   cursor: pointer;
-}
-
-.box:active {
-  /* border: 1px solid rgb(17, 0, 255); */
 }
 
 .boxNotActive,
@@ -99,5 +93,10 @@
 }
 
 .all-list {
-  border: 1px solid red;
+  z-index: 2;
+}
+
+.annotation-link {
+  text-decoration: none;
+  color: #212529;
 }

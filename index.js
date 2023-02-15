@@ -55,6 +55,7 @@ function clearZone() {
     arrZones.forEach((element) => {
         deleteZone(element);
     });
+
     console.log("allShapes :", allShapes);
     eventType = "";
 
@@ -79,6 +80,7 @@ window.onload = () => {
 mainBody.addEventListener('click', newZone);
 
 function newZone(_event) {
+    console.log("newZone called.");
     if (eventType === "rectangle") {
         let { x, y } = getMousePos(image, _event);
         const objZone = {
@@ -186,7 +188,7 @@ function addZoneBox(_objZone, _event) {
 
 // Make element draggable
 function makeDraggable(_element, _objZone) {
-    console.log("makeDraggable")
+    console.log("makeDraggable called.")
     var pos1 = 0,
         pos2 = 0,
         pos3 = 0,
@@ -217,7 +219,11 @@ function makeDraggable(_element, _objZone) {
     function elementDrag(e) {
 
         let popover = document.getElementById("popover");
+        popover.style.position = "absolute";
+        popover.style.top = 0 + "px";
+        popover.style.left = 0 + "px";
         popover.style.display = "none";
+
         if (!_element) {
             return;
         }
@@ -552,12 +558,14 @@ function getElementPosition(_element) {
     }
 }
 
+// convert px To Percentage
 function pxToPercentage(_startX, _startY) {
     let xPercent = parseFloat(_startX / image.width * 100);
     let yPercent = parseFloat(_startY / image.height * 100);
     return { x: xPercent, y: yPercent };
 }
 
+// // convert Percentage To Px
 function PercentageToPx(_startX, _startY) {
     let orgX = parseFloat(_startX / 100 * image.width);
     let orgY = parseFloat(_startY / 100 * image.height);
@@ -575,10 +583,17 @@ function selectBox(ID) {
                 box.style.border = '3px solid black';
             });
 
+            const links = document.querySelectorAll(".annotation-link");
+            links.forEach(link => {
+                link.style.color = "black";
+                link.style.textDecoration = "none";
+            });
+
             closePopOver(_id);
             selectedId = null;
         }
         else {
+
             selectedId = Number(_id);
 
             const boxes = document.querySelectorAll('.boxNotActive');
@@ -586,22 +601,37 @@ function selectBox(ID) {
                 box.style.border = '3px solid black';
             });
 
+            const links = document.querySelectorAll(".annotation-link");
+            links.forEach(link => {
+                link.style.color = "black";
+                link.style.textDecoration = "none";
+            });
+
             const selectedBox = document.getElementById("box" + selectedId);
             selectedBox.style.border = '3px solid red';
 
-            let shape = allShapes.filter((item) => item.slug === selectedId.toString())[0];
+            const link = document.getElementById("link" + ID);
+            link.style.color = '#0a58ca';
+            link.style.textDecoration = 'underline';
 
-            openPopOver();
+            // const links = document.querySelectorAll(".link" + ID);
+            // links.forEach(link => {
+            //     link.style.color = "black";
+            // });
+
+            // const link = document.getElementById("link" + selectedId);
+            // link.style.color = "#0a58ca";
+
+            openPopOver(selectedId);
         }
     }
 }
 
 // open popover
-function openPopOver() {
+function openPopOver(_selectedId) {
 
-    let _shape = allShapes.filter((item) => item.slug === selectedId.toString())[0];
-
-    let { x, y } = PercentageToPx(_shape?.x, _shape?.y);
+    let _shape = allShapes.filter((item) => item.slug == _selectedId.toString())[0];
+    let { x, y } = PercentageToPx(_shape.x, _shape.y);
     let { x: width, y: height } = PercentageToPx(_shape?.width, _shape?.height);
 
     let popover = document.getElementById("popover");
@@ -622,6 +652,7 @@ function openPopOver() {
 
 // close popover
 function closePopOver(ID) {
+
     const ul = document.getElementById("details-list");
     const listItems = Object.assign({}, Array.from(ul.children).map(li => li.innerHTML));
 
@@ -640,7 +671,17 @@ function closePopOver(ID) {
     const selectedBox = document.getElementById("box" + ID);
     selectedBox.style.border = '3px solid black';
 
+    const link = document.getElementById("link" + ID);
+    link.style.color = '#212529';
+    link.style.textDecoration = 'none';
+
+    // const link = document.getElementById("link" + ID);
+    // link.style.color = "black";
+
     let popover = document.getElementById("popover");
+    popover.style.position = "absolute";
+    popover.style.top = 0 + "px";
+    popover.style.left = 0 + "px";
     popover.style.display = "none";
 
     selectedId = null;
@@ -659,7 +700,7 @@ function handelSubmit() {
     const ul = document.getElementById("details-list");
     const li = document.createElement("li");
     let val = input.value.toString().trim();
-    if (val.length > 1) {
+    if (val.length > 0) {
         li.innerHTML = val;
         ul.appendChild(li);
         input.value = "";
@@ -670,15 +711,21 @@ function handelSubmit() {
 
 }
 
+// generate list of annotation
 function generateList() {
     var ul = document.getElementById("annotationList");
     ul.innerHTML = "";
     allShapes?.forEach((value, index, array) => {
         var li = document.createElement("li");
+        var a = document.createElement("a");
         let text = document.createTextNode("Annotation " + value.slug);
-        li.addEventListener('click', () => handelListItemClick(value?.slug));
-        li.appendChild(text);
+        a.appendChild(text);
+        a.setAttribute("href", "#");
+        a.setAttribute("id", "link" + value.slug);
+        a.setAttribute("class", "annotation-link");
+        li.appendChild(a);
         ul.appendChild(li);
+        a.addEventListener("click", handelListItemClick);
     })
 }
 
