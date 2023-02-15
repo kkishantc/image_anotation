@@ -199,7 +199,7 @@ function addZoneBox(_objZone, _event) {
     }
     let { x, y } = PercentageToPx(_objZone.x, _objZone.y)
     let { x: width, y: height } = PercentageToPx(_objZone.width, _objZone.height)
-    theDiv.id = "box" + _objZone.slug;
+    theDiv.id = `box${_objZone.slug}`;
     theDiv.addEventListener('click', () => selectBox(_objZone.slug));
     theDiv.style.position = "absolute";
     theDiv.style.top =
@@ -494,7 +494,7 @@ function deleteZone(_objZone) {
     allShapes = arrZones;
     saveZones(arrZones);
 
-    document.getElementById("box" + _objZone?.slug)?.remove();
+    document.getElementById(`box${_objZone?.slug}`)?.remove();
 }
 
 // Add a zone to zone collection
@@ -641,10 +641,10 @@ function selectBox(ID) {
                 link.style.textDecoration = "none";
             });
 
-            const selectedBox = document.getElementById("box" + selectedId);
+            const selectedBox = document.getElementById(`box${selectedId}`);
             selectedBox.style.border = '3px solid red';
 
-            const link = document.getElementById("link" + ID);
+            const link = document.getElementById(`link${ID}`);
             link.style.color = '#0a58ca';
             link.style.textDecoration = 'underline';
 
@@ -677,19 +677,19 @@ function openPopOver(_selectedId) {
 
     if (angle === 0 || Number.isNaN(angle)) {
         popover.style.transform = `rotate(0deg)`;
-        popover.style.top = y + height + "px";
-        popover.style.left = x + "px";
+        popover.style.top = `${y + height}px`;
+        popover.style.left = `${x}px`;
     }
     else if (angle === 90) {
         popover.style.transform = `rotate(270deg)`;
-        popover.style.top = y - width + "px";
-        popover.style.left = x + width - 25 + "px";
+        popover.style.top = `${-225}px`;
+        popover.style.left = `${100}px`;
     }
-    else if (angle === 180) {
-        popover.style.transform = `rotate(180deg)`;
-        popover.style.top = y - width - height + "px";
-        popover.style.left = x + "px";
-    }
+    // else if (angle === 180) {
+    //     popover.style.transform = `rotate(180deg)`;
+    //     popover.style.top = `${y}px`;
+    //     popover.style.left = `${x}px`;
+    // }
 
     const ul = document.getElementById("details-list");
     ul.innerHTML = "";
@@ -719,15 +719,12 @@ function closePopOver(ID) {
 
     ul.innerHTML = "";
 
-    const selectedBox = document.getElementById("box" + ID);
+    const selectedBox = document.getElementById(`box${ID}`);
     selectedBox.style.border = '3px solid black';
 
-    const link = document.getElementById("link" + ID);
-    link.style.color = '#212529';
+    const link = document.getElementById(`link${ID}`);
+    link.style.color = '#212529';                        
     link.style.textDecoration = 'none';
-
-    // const link = document.getElementById("link" + ID);
-    // link.style.color = "black";
 
     let popover = document.getElementById("popover");
     popover.style.position = "absolute";
@@ -769,10 +766,10 @@ function generateList() {
     allShapes?.forEach((value, index, array) => {
         var li = document.createElement("li");
         var a = document.createElement("a");
-        let text = document.createTextNode("Annotation " + value.slug);
+        let text = document.createTextNode(`Annotation ${value.slug}`);
         a.appendChild(text);
         a.setAttribute("href", "#");
-        a.setAttribute("id", "link" + value.slug);
+        a.setAttribute("id", `link${value.slug}`);
         a.setAttribute("class", "annotation-link");
         li.appendChild(a);
         ul.appendChild(li);

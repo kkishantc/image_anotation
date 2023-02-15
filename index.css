@@ -81,14 +81,10 @@
   width: 100%;
   height: 93%;
   position: absolute;
-  /* border: 1px solid rgb(229, 229, 253); */
   overflow: auto;
 }
-.card {
-  border: none !important;
-}
+
 #main-body {
-  /* transition: all 0.5s ease-in-out; */
   transform-origin: 0% 0%;
 }
 
