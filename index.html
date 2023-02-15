@@ -12,33 +12,94 @@
       integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD"
       crossorigin="anonymous"
     />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/fontawesome.min.css"
+      integrity="sha512-cHxvm20nkjOUySu7jdwiUxgGy11vuVPE9YeK89geLMLMMEOcKFyS2i+8wo0FOwyQO/bL8Bvq1KMsqK4bbOsPnA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css"
+      integrity="sha512-SzlrxWUlpfuzQ+pcUCosxcglQRNAq/DZjVsC0lE40xsADsfeQoEypE+enwcOiGjk/bSuGGKHEyjSoQ1zVisanQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
   </head>
   <body>
-    <div class="controls">
-      <button class="control-btn" onclick="setType('rectangle')">
-        Rectangle
-      </button>
-      <button class="control-btn" onclick="setType('circle')">Circle</button>
-      <button class="control-btn" onclick="setType('point')">Point</button>
-      <button class="control-btn" onclick="setType('clear')">Clear</button>
-      <button class="control-btn" onclick="setType('erase')">erase</button>
-    </div>
-    <div style="display: none">
-      <textarea name="ctrZones"></textarea>
-    </div>
-    <!-- <div class="image-box">
-    </div> -->
-    <div id="main-body">
-      <!-- <img src="./images.jpeg" id="image" class="imagePortrait" /> -->
-      <img
-        src="https://cdn.pixabay.com/photo/2015/11/16/14/43/cat-1045782__340.jpg"
-        id="image"
-        class="imagePortrait"
-      />
+    <div class="d-flex justify-content-between align-content-center">
+      <div class="">
+        <div class="controls">
+          <button class="control-btn" onclick="setType('rectangle')">
+            Rectangle
+          </button>
+          <button class="control-btn" onclick="setType('circle')">
+            Circle
+          </button>
+          <button class="control-btn" onclick="setType('point')">Point</button>
+          <!-- <button class="control-btn" onclick="setType('rotate')">Rotate</button> -->
+          <button class="control-btn" onclick="setType('clear')">
+            Clear All
+          </button>
+          <button class="control-btn" onclick="setType('erase')">Erase</button>
+        </div>
+        <div style="display: none">
+          <textarea name="ctrZones"></textarea>
+        </div>
+        <div id="container">
+          <div id="main-body" style="position: relative">
+            <!-- <img src="./images.jpeg" id="image" class="imagePortrait" /> -->
+            <img
+              src="https://cdn.pixabay.com/photo/2015/11/16/14/43/cat-1045782__340.jpg"
+              id="image"
+              class="imagePortrait"
+            />
 
-      <!-- popover content -->
-      <div id="popover-content" class="d-none">
-        <h1>Hi</h1>
+            <!-- popover content -->
+            <div id="popover" class="">
+              <div class="card" style="width: 15rem">
+                <div class="card-body">
+                  <i class="fa-solid fa-xmark" onclick="handelClose();"></i>
+                  <ul id="details-list"></ul>
+                  <form action="" method="">
+                    <div class="mb-3">
+                      <label for="details" class="form-label">Details</label>
+                      <input
+                        placeholder="Enter detail"
+                        autocomplete="off"
+                        type="text"
+                        class="form-control"
+                        id="details"
+                      />
+                    </div>
+                    <div class="d-flex justify-content-between">
+                      <button
+                        type="button"
+                        onclick="handelClose();"
+                        class="btn btn-outline-primary"
+                      >
+                        Close
+                      </button>
+                      <button
+                        type="button"
+                        onclick="handelSubmit();"
+                        class="btn btn-primary"
+                      >
+                        Submit
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="mx-3">
+        <div class="all-list">
+          <ul id="annotationList"></ul>
+        </div>
       </div>
     </div>
   </body>
