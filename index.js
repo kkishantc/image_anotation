@@ -332,6 +332,13 @@ function makeResizable(_element, _objZone) {
     }
 
     function doDrag(e) {
+        
+        let popover = document.getElementById("popover");
+        popover.style.position = "absolute";
+        popover.style.top = 0 + "px";
+        popover.style.left = 0 + "px";
+        popover.style.display = "none";
+
         e.stopPropagation();
         _element.style.width = startWidth + e.clientX - startX + "px";
         _element.style.height = startHeight + e.clientY - startY + "px";

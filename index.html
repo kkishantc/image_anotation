@@ -12,7 +12,8 @@
       integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD"
       crossorigin="anonymous"
     />
-    <link
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!-- <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/fontawesome.min.css"
       integrity="sha512-cHxvm20nkjOUySu7jdwiUxgGy11vuVPE9YeK89geLMLMMEOcKFyS2i+8wo0FOwyQO/bL8Bvq1KMsqK4bbOsPnA=="
@@ -26,35 +27,42 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/regular.min.css" integrity="sha512-3YMBYASBKTrccbNMWlnn0ZoEOfRjVs9qo/dlNRea196pg78HaO0H/xPPO2n6MIqV6CgTYcWJ1ZB2EgWjeNP6XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/solid.min.css" integrity="sha512-bdTSJB23zykBjGDvyuZUrLhHD0Rfre0jxTd0/jpTbV7sZL8DCth/88aHX0bq2RV8HK3zx5Qj6r2rRU/Otsjk+g==" crossorigin="anonymous" referrerpolicy="no-referrer" /> -->
   </head>
   <body>
     <div class="d-flex justify-content-between align-content-center">
       <div class="">
-        <div class="controls">
-          <button class="control-btn" onclick="setType('rectangle')">
-            Rectangle
-          </button>
-          <button class="control-btn" onclick="setType('circle')">
-            Circle
-          </button>
-          <button class="control-btn" onclick="setType('point')">Point</button>
-
-          <button class="control-btn" onclick="setType('clear')">
-            Clear All
-          </button>
-          <button class="control-btn" onclick="setType('erase')">Erase</button>
+        <div class="controls d-flex gap-1 flex-column">
+          <div class="">
+            <button class="control-btn" onclick="setType('rectangle')">
+              Rectangle  <i class='fa fa-square'></i>
+            </button>
+            <button class="control-btn" onclick="setType('circle')">
+              Circle <i class="fa fa-circle-o"></i>
+            </button>
+            <button class="control-btn" onclick="setType('point')">Point <i class='fa fa-circle'></i></button>
+          </div>
+          <div class="">
+            <button class="control-btn" onclick="setType('clear')">
+              Clear All 
+            </button>
+            <button class="control-btn" onclick="setType('erase')">Erase <i class="fa fa-eraser"></i> </button>
+            <button class="control-btn" onclick="setType('rotate')">
+              Rotate <i class="fa-solid fa-rotate"></i>
+            </button>
+          </div>
+          <div class=""> 
           <button class="control-btn" onclick="setType('zoomIn')">
-            Zoom In <i class="fa-solid fa-magnifying-glass-plus"></i>
+            Zoom In <i class='fa fa-plus'></i>
           </button>
           <button class="control-btn" onclick="setType('zoomReset')">
             Zoom Reset
           </button>
           <button class="control-btn" onclick="setType('zoomOut')">
-            Zoom Out <i class="fa-solid fa-magnifying-glass-minus"></i>
+            Zoom Out <i class='fa fa-minus'></i>
           </button>
-          <button class="control-btn" onclick="setType('rotate')">
-            Rotate
-          </button>
+        </div>
         </div>
         <div style="display: none">
           <textarea name="ctrZones"></textarea>
