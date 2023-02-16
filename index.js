@@ -20,7 +20,6 @@ function getMousePos(canvas, evt) {
 
 function setType(_type) {
     eventType = _type;
-    console.log("eventType: ", eventType);
     if (eventType === "clear") {
         clearZone();
     }
@@ -49,7 +48,7 @@ function rotateImage(mainBody) {
     if (rotationAngle >= 360) {
         rotationAngle = 0;
     }
-    if (selectedId != null) {
+    if (selectedId != null && allShapes.length>0) {
         closePopOver(selectedId);
     }
 }
@@ -68,8 +67,6 @@ function clearZone() {
     arrZones.forEach((element) => {
         deleteZone(element);
     });
-
-    console.log("allShapes :", allShapes);
     eventType = "";
 
     let popover = document.getElementById("popover");
@@ -78,13 +75,11 @@ function clearZone() {
 
 function zoomIn(ele) {
     zoomLevel += 0.1;
-    console.log("zoomLevel: ", zoomLevel)
     ele.style.transform = `scale(${zoomLevel})`;
     ele.style.transformOrigin = "0% 0%";
 }
 
 function zoomOut(ele) {
-    console.log("zoomLevel: ", zoomLevel)
     if (zoomLevel >= 0.2) {
         zoomLevel -= 0.1;
         ele.style.transform = `scale(${zoomLevel})`;
@@ -104,7 +99,6 @@ function getImageRatio(_imgElement) {
 // User has clicked on the image so create a new zone
 
 window.onload = () => {
-    console.log("image size: ", image.width, image.height)
     let mBody = document.getElementById("main-body");
     mBody.style.width = image.width + "px";
     mBody.style.height = image.height + "px";
@@ -114,7 +108,6 @@ window.onload = () => {
 mainBody.addEventListener('click', newZone);
 
 function newZone(_event) {
-    console.log("newZone called.");
     if (eventType === "rectangle") {
         let { x, y } = getMousePos(image, _event);
         const objZone = {
@@ -222,7 +215,6 @@ function addZoneBox(_objZone, _event) {
 
 // Make element draggable
 function makeDraggable(_element, _objZone) {
-    console.log("makeDraggable called.")
     var pos1 = 0,
         pos2 = 0,
         pos3 = 0,
@@ -370,28 +362,11 @@ initZones();
 // Initialize all the zones for the current page
 function initZones() {
     let tempAllShape = [];
-    tempAllShape.push({
-
-        height
-            :
-            25,
-        slug
-            :
-            "94414",
-        type
-            :
-            "rectangle",
-        width
-            :
-            25,
-        x
-            :
-            10,
-        y
-            :
-            10,
-
-    })
+    tempAllShape.push({slug:"94414",type:"rectangle",width:15,height:15,x:0,y:0})
+    tempAllShape.push({slug:"94415",type:"rectangle",width:15,height:15,x:85,y:0})
+    tempAllShape.push({slug:"94416",type:"rectangle",width:15,height:15,x:85,y:85})
+    tempAllShape.push({slug:"94417",type:"rectangle",width:15,height:15,x:0,y:85})
+    tempAllShape.push({slug:"94418",type:"rectangle",width:15,height:15,x:45,y:40})
     // allShapes.push({ width: 1, height: 1, y: 77.70304388557624, x: 53.050270925895425, eventType: "point", slug: 010101 })
     // allShapes = JSON.parse(localStorage.getItem("allShapes")) || [];
     tempAllShape?.forEach((objZone) => {
@@ -653,15 +628,6 @@ function selectBox(ID) {
     }
 }
 
-function getRotationAngle(ele) {
-    const style = window.getComputedStyle(ele);
-    const transform = style.getPropertyValue("transform");
-    const matrix = transform.substr(7).split(",");
-    const angle = Math.round(Math.atan2(matrix[1], matrix[0]) * (180 / Math.PI));
-    return angle;
-}
-
-
 // open popover
 function openPopOver(_selectedId) {
 
@@ -669,27 +635,12 @@ function openPopOver(_selectedId) {
     let { x, y } = PercentageToPx(_shape.x, _shape.y);
     let { x: width, y: height } = PercentageToPx(_shape?.width, _shape?.height);
 
-    let angle = getRotationAngle(mainBody);
-    console.log("angle: ", angle);
     let popover = document.getElementById("popover");
     popover.style.display = "block";
     popover.style.position = "absolute";
-
-    if (angle === 0 || Number.isNaN(angle)) {
-        popover.style.transform = `rotate(0deg)`;
-        popover.style.top = `${y + height}px`;
-        popover.style.left = `${x}px`;
-    }
-    else if (angle === 90) {
-        popover.style.transform = `rotate(270deg)`;
-        popover.style.top = `${-225}px`;
-        popover.style.left = `${100}px`;
-    }
-    // else if (angle === 180) {
-    //     popover.style.transform = `rotate(180deg)`;
-    //     popover.style.top = `${y}px`;
-    //     popover.style.left = `${x}px`;
-    // }
+    popover.style.transform = `rotate(0deg)`;
+    popover.style.top = `${y + height}px`;
+    popover.style.left = `${x}px`;
 
     const ul = document.getElementById("details-list");
     ul.innerHTML = "";
