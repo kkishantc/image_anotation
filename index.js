@@ -12,6 +12,7 @@ function getMousePos(canvas, evt) {
     var rect = canvas.getBoundingClientRect()
     let x = (evt.clientX - rect.left);
     let y = (evt.clientY - rect.top);
+  
     return {
         x,
         y
@@ -40,9 +41,10 @@ function setType(_type) {
     }
 }
 
-function rotateImage(mainBody) {
+function rotateImage() {
     let container = document.getElementById("main-body");
     container.style.transformOrigin = "50% 73%";
+    // container.style.transformOrigin = "center";
     container.style.transform = `rotate(${rotationAngle}deg)`;
     rotationAngle += 90;
     if (rotationAngle >= 360) {
@@ -166,10 +168,10 @@ function isMouseInShape(event, mx, my, shape) {
     //         return (true);
     //     }
     // } else if (shape.width) {
-    // this is a rectangle
+    // this is a rectangle  
 
-    let { x, y } = PercentageToPx(shape.x, shape.y);
-    let { x: width, y: height } = PercentageToPx(shape.width, shape.height);
+    let { x, y } = PercentageToPx(shape.x, shape.y,getImageRatio(mainBody));
+    let { x: width, y: height } = PercentageToPx(shape.width, shape.height,getImageRatio(mainBody));
     var rLeft = x;
     var rRight = x + width;
     var rTop = y;
@@ -190,19 +192,38 @@ function addZoneBox(_objZone, _event) {
     if (_objZone.type === "point") {
         theDiv.classList.add("point")
     }
-    let { x, y } = PercentageToPx(_objZone.x, _objZone.y)
-    let { x: width, y: height } = PercentageToPx(_objZone.width, _objZone.height)
+ 
     theDiv.id = `box${_objZone.slug}`;
-    theDiv.addEventListener('click', () => selectBox(_objZone.slug));
+    theDiv.addEventListener('click', () => selectBox(_objZone.slug));    
     theDiv.style.position = "absolute";
-    theDiv.style.top =
+    let angle=getRotationAngle(mainBody);
+    console.log("angle: ",angle)
+    let { x, y } = PercentageToPx(_objZone.x,_objZone.y,angle)
+    let { x: width, y: height } = PercentageToPx( _objZone.width,_objZone.height,angle)
+    if(Number.isNaN(angle)){
+       
+        theDiv.style.top =
         y +
         "px";
     theDiv.style.left =
         x +
         "px";
     theDiv.style.width = width + "px";
-    theDiv.style.height = height + "px";
+    theDiv.style.height = height + "px";  
+    }
+
+    else if(angle==90){
+     
+        theDiv.style.top =
+        x +
+        "px";
+    theDiv.style.left =
+        y +
+        "px";
+    theDiv.style.width = width + "px";
+    theDiv.style.height = height + "px";  
+    }
+    
 
     makeDraggable(theDiv, _objZone);
     if (_objZone.type != "point") {
@@ -377,8 +398,9 @@ function initZones() {
     // allShapes.push({ width: 1, height: 1, y: 77.70304388557624, x: 53.050270925895425, eventType: "point", slug: 010101 })
     // allShapes = JSON.parse(localStorage.getItem("allShapes")) || [];
     tempAllShape?.forEach((objZone) => {
-        let { x, y } = PercentageToPx(objZone.x, objZone.y);
-        let { x: width, y: height } = PercentageToPx(objZone.width, objZone.height);
+        let angle=getRotationAngle(mainBody);
+        let { x, y } = PercentageToPx(objZone.x, objZone.y,angle);
+        let { x: width, y: height } = PercentageToPx(objZone.width, objZone.height,angle);
         objZone.x = x;
         objZone.y = y;
         objZone.width = width;
@@ -446,8 +468,8 @@ function updateZone(_objZone) {
 
         getZones().forEach((objZone) => {
             if (objZone.slug === _objZone?.slug) {
-                let { x, y } = pxToPercentage(_objZone.x, _objZone.y);
-                let { x: width, y: height } = pxToPercentage(_objZone.width, _objZone.height);
+                let { x, y } = pxToPercentage(_objZone.x, _objZone.y,getImageRatio(mainBody));
+                let { x: width, y: height } = pxToPercentage(_objZone.width, _objZone.height,getImageRatio(mainBody));
                 _objZone.x = x;
                 _objZone.y = y;
                 _objZone.width = width;
@@ -482,8 +504,9 @@ function deleteZone(_objZone) {
 // Add a zone to zone collection
 function addZone(_objZone) {
     const arrZones = getZones();
-    let { x, y } = pxToPercentage(_objZone.x, _objZone.y);
-    let { x: width, y: height } = pxToPercentage(_objZone.width, _objZone.height);
+    let angle = getRotationAngle(mainBody);
+    let { x, y } = pxToPercentage(_objZone.x, _objZone.y,angle);
+    let { x: width, y: height } = pxToPercentage(_objZone.width, _objZone.height,angle);
     _objZone.x = x;
     _objZone.y = y;
     _objZone.width = width;
@@ -575,18 +598,34 @@ function getElementPosition(_element) {
 }
 
 // convert px To Percentage
-function pxToPercentage(_startX, _startY) {
-    let xPercent = parseFloat(_startX / image.width * 100);
-    let yPercent = parseFloat(_startY / image.height * 100);
-    return { x: xPercent, y: yPercent };
+function pxToPercentage(_startX, _startY,angle) {
+    if(Number.isNaN(angle) || angle==180){
+        let xPercent = parseFloat(_startX / image.width * 100);
+        let yPercent = parseFloat(_startY / image.height * 100);
+        return { x: xPercent, y: yPercent };
+    }
+    else if(angle==90 || angle==270){
+        let xPercent = parseFloat(_startX /  image.height* 100);
+        let yPercent = parseFloat(_startY / image.width * 100);
+        return { x: xPercent, y: yPercent };
+    }
 }
 
 // // convert Percentage To Px
-function PercentageToPx(_startX, _startY) {
-    let orgX = parseFloat(_startX / 100 * image.width);
-    let orgY = parseFloat(_startY / 100 * image.height);
+function PercentageToPx(_startX, _startY,angle) {
+    if(Number.isNaN(angle) || angle==180){
+        let orgX = parseFloat(_startX / 100 * image.width);
+        let orgY = parseFloat(_startY / 100 * image.height);
+        return { x: orgX, y: orgY };
+    }
+    else if(angle==90 || angle==270){
+        let orgX = parseFloat(_startX / 100 * image.height);
+        let orgY = parseFloat(_startY / 100 * image.width);
+        return { x: orgX, y: orgY };
+    }
+  
 
-    return { x: orgX, y: orgY };
+   
 }
 
 // select div box
@@ -639,8 +678,8 @@ function selectBox(ID) {
 function openPopOver(_selectedId) {
 
     let _shape = allShapes.filter((item) => item.slug == _selectedId.toString())[0];
-    let { x, y } = PercentageToPx(_shape.x, _shape.y);
-    let { x: width, y: height } = PercentageToPx(_shape?.width, _shape?.height);
+    let { x, y } = PercentageToPx(_shape.x, _shape.y,getImageRatio(mainBody));
+    let { x: width, y: height } = PercentageToPx(_shape?.width, _shape?.height,getImageRatio(mainBody));
 
     let popover = document.getElementById("popover");
     popover.style.display = "block";
@@ -738,4 +777,12 @@ function generateList() {
 function handelListItemClick(e) {
     let id = e.target.id.toString().replace("link", "");
     selectBox(id);
+}
+
+function getRotationAngle(ele) {
+    const style = window.getComputedStyle(ele);
+    const transform = style.getPropertyValue("transform");
+    const matrix = transform.substr(7).split(",");
+    const angle = Math.round(Math.atan2(matrix[1], matrix[0]) * (180 / Math.PI));
+    return angle;
 }
