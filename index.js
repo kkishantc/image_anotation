@@ -1,4 +1,4 @@
-var zoomLevel = 100;
+var zoomLevel = 1;
 var eventType = "";
 var allShapes = [];
 var allDetails = [];
@@ -52,13 +52,13 @@ function setType(_type) {
     rotateImage(mainBody, rotationAngle);
   }
   if (eventType === "zoomIn") {
-    zoomIn(mainBody);
+    zoomIn();
   }
   if (eventType === "zoomOut") {
-    zoomOut(mainBody);
+    zoomOut();
   }
   if (eventType === "zoomReset") {
-    zoomReset(mainBody);
+    zoomReset();
   }
 }
 
@@ -106,48 +106,53 @@ function clearZone() {
 }
 
 function zoomIn(ele) {
-  zoomLevel += 10;
-  //   ele.style.transform = `scale(${zoomLevel})`;
-  //   ele.style.transformOrigin = "0% 0%";
-  image.width += zoomLevel;
-  image.height += zoomLevel;
+  // zoomLevel += 0.1;
+  // image.width += zoomLevel;
+  // image.height += zoomLevel;
+  // ele.style.transform = `scale(${zoomLevel})`;
+  // ele.style.transformOrigin = "0% 0%";
+  image.width += image.width * 0.1;
+  image.height += image.height * 0.1;
   reDraw();
 }
 
 function zoomOut(ele) {
-  if (zoomLevel >= 50) {
-    zoomLevel -= 10;
-    image.width -= zoomLevel;
-    image.height -= zoomLevel;
+  if (zoomLevel >= 0.2) {
+    // zoomLevel -= 0.1;
+    // image.width -= zoomLevel;
+    // image.height -= zoomLevel;
     // ele.style.transform = `scale(${zoomLevel})`;
     // ele.style.transformOrigin = "0% 0%";
+    image.width -= image.width * 0.1;
+    image.height -= image.height * 0.1;
     reDraw();
   }
 }
 
 function zoomReset(ele) {
-  zoomLevel = 100;
-  //   ele.style.transform = `scale(1)`;
+  // zoomLevel = 1;
+  // ele.style.transform = `scale(1)`;
   image.width = OrgImageSize.width;
   image.height = OrgImageSize.height;
   reDraw();
 }
 
 function reDraw() {
-  allShapes?.forEach((objZone) => {
-    let ele = document.getElementById(`box${objZone.slug}`);
-    ele.remove();
-    deleteZone(objZone);
-    console.log("ele :>> ", ele);
-    let { x, y } = PercentageToPx(objZone.x, objZone.y);
-    let { x: width, y: height } = PercentageToPx(objZone.width, objZone.height);
-    objZone.x = x;
-    objZone.y = y;
-    objZone.width = width;
-    objZone.height = height;
-    addZone(objZone);
-    addZoneBox(objZone);
-  });
+  // allShapes?.forEach((objZone) => {
+  //   let ele = document.getElementById(`box${objZone.slug}`);
+  //   ele.remove();
+  //   // deleteZone({ ...objZone });
+  //   let { x, y } = PercentageToPx(objZone.x, objZone.y);
+  //   let { x: width, y: height } = PercentageToPx(objZone.width, objZone.height);
+  //   objZone.x = x;
+  //   objZone.y = y;
+  //   if (objZone.type !== "point") {
+  //     objZone.width = width;
+  //     objZone.height = height;
+  //   }
+  //   updateZone(objZone);
+  //   addZoneBox(objZone);
+  // });
 }
 
 // Get ratio (that is: 2 means original has twice the size; 1/2 means original has half the size)
@@ -157,48 +162,68 @@ function getImageRatio(_imgElement) {
 // User has clicked on the image so create a new zone
 
 function setImageInViewPort() {
-  let cntZoomLevel = 0;
-  let tempImageWidth = 0;
-  let tempImageHeight = 0;
+  var tempImageWidth = 0;
+  var tempImageHeight = 0;
 
-  console.log("image.width,image.height :>> ", image.width, image.height);
+  // console.log("image.width,image.height :>> ", image.width, image.height);
 
   const imageNWidth = image.naturalWidth;
-  const imageHeight = image.naturalHeight;
-  console.log("imageNWidth,imageHeight :>> ", imageNWidth, imageHeight);
+  const imageNHeight = image.naturalHeight;
+  console.log("imageNWidth,imageHeight :>> ", imageNWidth, imageNHeight);
+
+  tempImageWidth = imageNWidth;
+  tempImageHeight = imageNHeight;
 
   const viewportWidth = window.innerWidth;
   const viewportHeight = window.innerHeight;
-  console.log(
-    "viewportWidth,viewportHeight :>> ",
-    viewportWidth,
-    viewportHeight
-  );
+  // console.log(
+  //   "viewportWidth,viewportHeight :>> ",
+  //   viewportWidth,
+  //   viewportHeight
+  // );
 
-  const sizeX = viewportWidth * 0.2;
-  const sizeY = viewportHeight * 0.2;
-  console.log("sizeX,sizeY :>> ", sizeX, sizeY);
+  // var sizeX = viewportWidth * 0.2;
+  // var sizeY = viewportHeight * 0.2;
+  // console.log("sizeX,sizeY :>> ", sizeX, sizeY);
 
-  let tempViewportWidth = viewportWidth - sizeX;
-  let tempViewportHeight = viewportHeight - sizeY;
+  var tempViewportWidth = viewportWidth - viewportWidth * 0.2;
+  var tempViewportHeight = viewportHeight - viewportHeight * 0.2;
   console.log(
     "tempViewportWidth,tempViewportHeight :>> ",
     tempViewportWidth,
     tempViewportHeight
   );
-  while (
-    tempImageHeight >= tempViewportHeight ||
-    tempImageWidth >= tempViewportWidth
-  ) {
-    // console.log("inside loop");
-    // type code for reduce temp image size base on viewport.
+  console.log("cond :>> ", tempImageWidth >= tempViewportWidth);
+  console.log("cond :>> ", tempImageHeight >= tempViewportHeight);
+  // while (tempImageWidth >= tempViewportWidth) {
+
+  // }
+  while (tempImageWidth >= tempViewportWidth) {
+    tempImageWidth = tempImageWidth - tempImageWidth * 0.1;
+  }
+  while (tempImageHeight >= tempViewportHeight) {
+    tempImageHeight = tempImageHeight - tempImageHeight * 0.1;
+  }
+
+  // console.log(
+  //   "tempImageWidth,tempImageHeight :>> ",
+  //   tempImageWidth,
+  //   tempImageHeight
+  // );
+  if (image) {
+    // console.log("image.width,image.height :>> ", image.width, image.height);
+    image.width = tempImageWidth;
+    image.height = tempImageHeight;
+    OrgImageSize.width = tempImageWidth;
+    OrgImageSize.height = tempImageHeight;
+    // console.log("image.width,image.height :>> ", image.width, image.height);
   }
 }
 
 window.onload = () => {
-  let mBody = document.getElementById("main-body");
-  mBody.style.width = `${image.width}px`;
-  mBody.style.height = `${image.height}px`;
+  // let mBody = document.getElementById("main-body");
+  // mBody.style.width = `${image.width}px`;
+  // mBody.style.height = `${image.height}px`;
   OrgImageSize.width = image.width;
   OrgImageSize.height = image.height;
   setImageInViewPort();
@@ -222,7 +247,6 @@ function newZone(_event) {
 
       type: "rectangle",
     };
-
     addZone(objZone);
     addZoneBox(objZone, _event);
   }
@@ -231,10 +255,7 @@ function newZone(_event) {
     const objZone = {
       x,
       y,
-      width: 10,
-      height: 10,
       slug: getNextZoneSequence(),
-
       type: "point",
     };
     addZone(objZone);
@@ -248,7 +269,6 @@ function newZone(_event) {
       width: 50,
       height: 50,
       slug: getNextZoneSequence(),
-
       type: "circle",
     };
     addZone(objZone);
@@ -305,8 +325,10 @@ function addZoneBox(_objZone, _event) {
 
   theDiv.style.top = `${y}px`;
   theDiv.style.left = `${x}px`;
-  theDiv.style.width = `${width}px`;
-  theDiv.style.height = `${height}px`;
+  if (_objZone.type !== "point") {
+    theDiv.style.width = `${width}px`;
+    theDiv.style.height = `${height}px`;
+  }
 
   makeDraggable(theDiv, _objZone);
   if (_objZone.type != "point") {
@@ -380,6 +402,7 @@ function makeDraggable(_element, _objZone) {
       _objZone.type === "circle" || _objZone.type === "point"
         ? "boxNotActive circle"
         : "boxNotActive";
+
     if (_objZone.type === "point") {
       _element.classList.add("point");
     }
@@ -475,13 +498,28 @@ function initZones() {
   tempAllShape.push({
     slug: "94413",
     type: "point",
-    width: 2,
-    height: 3,
-    x: 10,
-    y: 10,
+    x: 50,
+    y: 50,
   });
-  // tempAllShape.push({slug:"94414",type:"rectangle",width:15,height:15,x:0,y:0})
-  // tempAllShape.push({slug:"94415",type:"rectangle",width:15,height:15,x:85,y:0})
+
+  tempAllShape.push({
+    slug: "94414",
+    type: "rectangle",
+    width: 15,
+    height: 15,
+    x: 0,
+    y: 0,
+  });
+
+  tempAllShape.push({
+    slug: "94415",
+    type: "circle",
+    width: 10,
+    height: 15,
+    x: 55,
+    y: 55,
+  });
+
   // tempAllShape.push({slug:"94416",type:"rectangle",width:15,height:15,x:85,y:85})
   // tempAllShape.push({slug:"94417",type:"rectangle",width:15,height:15,x:0,y:85})
   // tempAllShape.push({slug:"94418",type:"rectangle",width:15,height:15,x:45,y:40})
@@ -492,8 +530,10 @@ function initZones() {
     let { x: width, y: height } = PercentageToPx(objZone.width, objZone.height);
     objZone.x = x;
     objZone.y = y;
-    objZone.width = width;
-    objZone.height = height;
+    if (objZone.type !== "point") {
+      objZone.width = width;
+      objZone.height = height;
+    }
     addZone(objZone);
     addZoneBox(objZone);
   });
@@ -599,9 +639,12 @@ function addZone(_objZone) {
   let { x: width, y: height } = pxToPercentage(_objZone.width, _objZone.height);
   _objZone.x = x;
   _objZone.y = y;
-  _objZone.width = width;
-  _objZone.height = height;
+  if (_objZone.type !== "point") {
+    _objZone.width = width;
+    _objZone.height = height;
+  }
   arrZones.push(_objZone);
+  console.log("2 _objZone :>> ", _objZone);
   allShapes = arrZones;
   // localStorage.setItem("allShapes", JSON.stringify(allShapes));
   saveZones(
