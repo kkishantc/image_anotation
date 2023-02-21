@@ -1,4 +1,3 @@
-var zoomLevel = 1;
 var eventType = "";
 var allShapes = [];
 var allDetails = [];
@@ -6,30 +5,12 @@ var rotationAngle = 0;
 var selectedId = null;
 var mainBody = document.getElementById("main-body");
 var image = document.getElementById("image");
+image.src = "./pexels-pedro-slinger-13519033.jpg";
+
 var OrgImageSize = {
   width: 0,
   height: 0,
 };
-
-function getRotatedCoordinates(x, y) {
-  let cx = image.width / 2;
-  let cy = image.height / 2;
-  const _angle = getRotationAngle(mainBody);
-  const theta = Number.isNaN(_angle) ? 0 : _angle;
-  const x1 = x - cx;
-  const y1 = y - cy;
-
-  const cosTheta = Math.cos((theta * Math.PI) / 180);
-  const sinTheta = Math.sin((theta * Math.PI) / 180);
-
-  const x2 = x1 * cosTheta - y1 * sinTheta;
-  const y2 = x1 * sinTheta + y1 * cosTheta;
-
-  const x3 = x2 + cx;
-  const y3 = y2 + cy;
-
-  return { x: x3, y: y3 };
-}
 
 function getMousePos(canvas, evt) {
   var rect = canvas.getBoundingClientRect();
@@ -105,136 +86,135 @@ function clearZone() {
   popover.style.display = "none";
 }
 
-function zoomIn(ele) {
-  // zoomLevel += 0.1;
-  // image.width += zoomLevel;
-  // image.height += zoomLevel;
-  // ele.style.transform = `scale(${zoomLevel})`;
-  // ele.style.transformOrigin = "0% 0%";
-  image.width += image.width * 0.1;
-  image.height += image.height * 0.1;
+function zoomIn() {
+  image.width += image.clientWidth * 0.1;
+  image.height += image.clientHeight * 0.1;
   reDraw();
 }
 
-function zoomOut(ele) {
-  if (zoomLevel >= 0.2) {
-    // zoomLevel -= 0.1;
-    // image.width -= zoomLevel;
-    // image.height -= zoomLevel;
-    // ele.style.transform = `scale(${zoomLevel})`;
-    // ele.style.transformOrigin = "0% 0%";
-    image.width -= image.width * 0.1;
-    image.height -= image.height * 0.1;
+function zoomOut() {
+  if (image.width >= 150 || image.height >= 150) {
+    image.width -= image.clientWidth * 0.1;
+    image.height -= image.clientHeight * 0.1;
     reDraw();
   }
 }
 
-function zoomReset(ele) {
-  // zoomLevel = 1;
-  // ele.style.transform = `scale(1)`;
+function zoomReset() {
   image.width = OrgImageSize.width;
   image.height = OrgImageSize.height;
   reDraw();
 }
 
 function reDraw() {
-  // allShapes?.forEach((objZone) => {
-  //   let ele = document.getElementById(`box${objZone.slug}`);
-  //   ele.remove();
-  //   // deleteZone({ ...objZone });
+  let mBody = document.getElementById("main-body");
+  mBody.style.width = `${image.width}px`;
+  mBody.style.height = `${image.height}px`;
+  // let data = allShapes.map((objZone, index, array) => {
+  //   console.log("objZone :>> ", objZone);
   //   let { x, y } = PercentageToPx(objZone.x, objZone.y);
   //   let { x: width, y: height } = PercentageToPx(objZone.width, objZone.height);
-  //   objZone.x = x;
-  //   objZone.y = y;
+  //   let { x: a, y: b } = pxToPercentage(x, y);
+  //   let { x: c, y: d } = pxToPercentage(width, height);
+  //   objZone.x = a;
+  //   objZone.y = b;
   //   if (objZone.type !== "point") {
-  //     objZone.width = width;
-  //     objZone.height = height;
+  //     objZone.width = c;
+  //     objZone.height = d;
   //   }
+  //   let ele = document.getElementById(`box${objZone.slug}`);
+  //   ele.remove();
   //   updateZone(objZone);
   //   addZoneBox(objZone);
+  //   return objZone;
   // });
+  // console.log("data :>> ", data);
+  allShapes?.forEach((objZone) => {
+    let ele = document.getElementById(`box${objZone.slug}`);
+    ele.remove();
+    deleteZone({ ...objZone });
+    let { x, y } = PercentageToPx(objZone.x, objZone.y);
+    let { x: width, y: height } = PercentageToPx(objZone.width, objZone.height);
+    objZone.x = x;
+    objZone.y = y;
+    if (objZone.type !== "point") {
+      objZone.width = width;
+      objZone.height = height;
+    }
+    addZone(objZone);
+    addZoneBox(objZone);
+  });
+  allShapes = [...allShapes];
 }
 
 // Get ratio (that is: 2 means original has twice the size; 1/2 means original has half the size)
 function getImageRatio(_imgElement) {
   return _imgElement.naturalWidth / _imgElement.width;
 }
-// User has clicked on the image so create a new zone
 
 function setImageInViewPort() {
   var tempImageWidth = 0;
   var tempImageHeight = 0;
 
-  // console.log("image.width,image.height :>> ", image.width, image.height);
-
   const imageNWidth = image.naturalWidth;
   const imageNHeight = image.naturalHeight;
-  console.log("imageNWidth,imageHeight :>> ", imageNWidth, imageNHeight);
 
   tempImageWidth = imageNWidth;
   tempImageHeight = imageNHeight;
 
   const viewportWidth = window.innerWidth;
   const viewportHeight = window.innerHeight;
-  // console.log(
-  //   "viewportWidth,viewportHeight :>> ",
-  //   viewportWidth,
-  //   viewportHeight
-  // );
-
-  // var sizeX = viewportWidth * 0.2;
-  // var sizeY = viewportHeight * 0.2;
-  // console.log("sizeX,sizeY :>> ", sizeX, sizeY);
 
   var tempViewportWidth = viewportWidth - viewportWidth * 0.2;
   var tempViewportHeight = viewportHeight - viewportHeight * 0.2;
-  console.log(
-    "tempViewportWidth,tempViewportHeight :>> ",
-    tempViewportWidth,
-    tempViewportHeight
-  );
-  console.log("cond :>> ", tempImageWidth >= tempViewportWidth);
-  console.log("cond :>> ", tempImageHeight >= tempViewportHeight);
-  // while (tempImageWidth >= tempViewportWidth) {
 
-  // }
+  var tempViewportWidth = viewportWidth;
+  var tempViewportHeight = viewportHeight;
+
   while (tempImageWidth >= tempViewportWidth) {
     tempImageWidth = tempImageWidth - tempImageWidth * 0.1;
   }
+
   while (tempImageHeight >= tempViewportHeight) {
     tempImageHeight = tempImageHeight - tempImageHeight * 0.1;
   }
 
-  // console.log(
-  //   "tempImageWidth,tempImageHeight :>> ",
-  //   tempImageWidth,
-  //   tempImageHeight
-  // );
   if (image) {
-    // console.log("image.width,image.height :>> ", image.width, image.height);
+    tempImageHeight -= viewportHeight * 0.1;
+
     image.width = tempImageWidth;
-    image.height = tempImageHeight;
+    image.height = tempImageHeight + viewportHeight * 0.1;
+
     OrgImageSize.width = tempImageWidth;
-    OrgImageSize.height = tempImageHeight;
-    // console.log("image.width,image.height :>> ", image.width, image.height);
+    OrgImageSize.height = tempImageHeight + viewportHeight * 0.1;
+
+    let mBody = document.getElementById("main-body");
+    mBody.style.width = `${tempImageWidth}px`;
+    mBody.style.height = `${tempImageHeight}px`;
+
+    if (
+      imageNWidth >= tempViewportWidth ||
+      imageNHeight >= tempViewportHeight
+    ) {
+      let container = document.getElementById("container");
+      container.style.width = `${tempImageWidth}px`;
+      container.style.height = `${tempImageHeight}px`;
+    }
   }
 }
 
 window.onload = () => {
-  // let mBody = document.getElementById("main-body");
-  // mBody.style.width = `${image.width}px`;
-  // mBody.style.height = `${image.height}px`;
-  OrgImageSize.width = image.width;
-  OrgImageSize.height = image.height;
-  setImageInViewPort();
-  //   image.setAttribute(
-  //     `style`,
-  //     `width:${mBody.style.width}; height:${mBody.style.height}`
-  //   );
+  if (image.src) {
+    OrgImageSize.width = image.width;
+    OrgImageSize.height = image.height;
+    setImageInViewPort();
+    initZones();
+  }
 };
 
 mainBody.addEventListener("click", newZone);
 
+// User has clicked on the image so create a new zone
 function newZone(_event) {
   if (eventType === "rectangle") {
     let { x, y } = getMousePos(image, _event);
@@ -491,52 +471,56 @@ function makeResizable(_element, _objZone) {
   }
 }
 
-// initZones();
 // Initialize all the zones for the current page
 function initZones() {
   let tempAllShape = [];
-  tempAllShape.push({
-    slug: "94413",
-    type: "point",
-    x: 50,
-    y: 50,
-  });
+  // tempAllShape.push({
+  //   slug: "94413",
+  //   type: "point",
+  //   x: 50,
+  //   y: 50,
+  // });
 
-  tempAllShape.push({
-    slug: "94414",
-    type: "rectangle",
-    width: 15,
-    height: 15,
-    x: 0,
-    y: 0,
-  });
+  // tempAllShape.push({
+  //   slug: "94414",
+  //   type: "rectangle",
+  //   width: 100,
+  //   height: 100,
+  //   x: 0,
+  //   y: 0,
+  // });
 
-  tempAllShape.push({
-    slug: "94415",
-    type: "circle",
-    width: 10,
-    height: 15,
-    x: 55,
-    y: 55,
-  });
+  // tempAllShape.push({
+  //   slug: "94415",
+  //   type: "circle",
+  //   width: 10,
+  //   height: 15,
+  //   x: 55,
+  //   y: 55,
+  // });
 
   // tempAllShape.push({slug:"94416",type:"rectangle",width:15,height:15,x:85,y:85})
   // tempAllShape.push({slug:"94417",type:"rectangle",width:15,height:15,x:0,y:85})
   // tempAllShape.push({slug:"94418",type:"rectangle",width:15,height:15,x:45,y:40})
   // allShapes.push({ width: 1, height: 1, y: 77.70304388557624, x: 53.050270925895425, eventType: "point", slug: 010101 })
   // allShapes = JSON.parse(localStorage.getItem("allShapes")) || [];
-  tempAllShape?.forEach((objZone) => {
-    let { x, y } = PercentageToPx(objZone.x, objZone.y);
-    let { x: width, y: height } = PercentageToPx(objZone.width, objZone.height);
-    objZone.x = x;
-    objZone.y = y;
-    if (objZone.type !== "point") {
-      objZone.width = width;
-      objZone.height = height;
-    }
-    addZone(objZone);
-    addZoneBox(objZone);
-  });
+  if (tempAllShape.length > 0) {
+    tempAllShape?.forEach((objZone) => {
+      let { x, y } = PercentageToPx(objZone.x, objZone.y);
+      let { x: width, y: height } = PercentageToPx(
+        objZone.width,
+        objZone.height
+      );
+      objZone.x = x;
+      objZone.y = y;
+      if (objZone.type !== "point") {
+        objZone.width = width;
+        objZone.height = height;
+      }
+      addZone(objZone);
+      addZoneBox(objZone);
+    });
+  }
 }
 
 // Get the next slug (by adding 1 to the highest slug so far)
@@ -550,7 +534,7 @@ function getZoneFromBox(_element) {
   var objReturn = null;
 
   getZones().forEach((objZone) => {
-    if (objZone.slug == intSequence) {
+    if (objZone.slug.toString() === intSequence.toString()) {
       objReturn = objZone;
 
       // Make sure coordinates still in line with image on the screen
@@ -561,7 +545,6 @@ function getZoneFromBox(_element) {
       objReturn.type = objZone.type;
     }
   });
-
   return objReturn;
 }
 
@@ -591,9 +574,10 @@ function getX(_x) {
 
 // Replace zone with zone passed as parameter
 function updateZone(_objZone) {
+  console.log("updateZone");
   if (eventType !== "erase" || (eventType !== "clear" && eventType === "")) {
     const arrZones = new Array();
-
+    console.log("_objZone :>> ", _objZone);
     getZones().forEach((objZone) => {
       if (objZone.slug === _objZone?.slug) {
         let { x, y } = pxToPercentage(_objZone.x, _objZone.y);
@@ -611,6 +595,7 @@ function updateZone(_objZone) {
       }
     });
     allShapes = arrZones;
+    console.log("allShapes :>> ", allShapes);
 
     // localStorage.setItem("allShapes", JSON.stringify(arrZones));
     saveZones(arrZones);
@@ -621,7 +606,7 @@ function updateZone(_objZone) {
 function deleteZone(_objZone) {
   let arrZones = new Array();
   getZones().forEach((item) => {
-    if (item.slug !== _objZone?.slug) {
+    if (item.slug.toString() !== _objZone?.slug.toString()) {
       arrZones.push(item);
     }
   });
@@ -644,7 +629,6 @@ function addZone(_objZone) {
     _objZone.height = height;
   }
   arrZones.push(_objZone);
-  console.log("2 _objZone :>> ", _objZone);
   allShapes = arrZones;
   // localStorage.setItem("allShapes", JSON.stringify(allShapes));
   saveZones(
