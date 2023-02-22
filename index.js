@@ -779,8 +779,13 @@ function openPopOver(_selectedId) {
   popover.style.display = "block";
   popover.style.position = "absolute";
   popover.style.transform = `rotate(0deg)`;
-  popover.style.top = `${y + height}px`;
-  popover.style.left = `${x}px`;
+  if (_shape.type !== "point") {
+    popover.style.top = `${y + height}px`;
+    popover.style.left = `${x}px`;
+  } else {
+    popover.style.top = `${y}px`;
+    popover.style.left = `${x}px`;
+  }
 
   const ul = document.getElementById("details-list");
   ul.innerHTML = "";
