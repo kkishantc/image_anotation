@@ -93,7 +93,6 @@ function clearZone() {
 function zoomIn() {
   image.width += image.clientWidth * 0.1;
   image.height += image.clientHeight * 0.1;
-
   reDraw();
 }
 
@@ -116,15 +115,15 @@ function reDraw() {
   mBody.style.width = `${image.width}px`;
   mBody.style.height = `${image.height}px`;
 
-  if (image.width >= maxW || image.height >= maxH) {
-    container.style.overflow = "auto";
-    container.style.width = `${maxW}px`;
-    container.style.height = `${maxH}px`;
-  } else {
-    container.style.overflow = "visible";
-    container.style.width = `${image.width}px`;
-    container.style.height = `${image.height}px`;
-  }
+  // if (image.width >= maxW || image.height >= maxH) {
+  //   container.style.overflow = "auto";
+  //   container.style.width = `${maxW}px`;
+  //   container.style.height = `${maxH}px`;
+  // } else {
+  //   container.style.overflow = "visible";
+  //   container.style.width = `${image.width}px`;
+  //   container.style.height = `${image.height}px`;
+  // }
   // let data = allShapes.map((objZone, index, array) => {
   //   console.log("objZone :>> ", objZone);
   //   let { x, y } = PercentageToPx(objZone.x, objZone.y);
@@ -195,7 +194,7 @@ function setImageInViewPort() {
   // maxW = viewportWidth;
   maxW = viewportWidth * 0.8;
   maxH = viewportHeight * 0.8;
-  console.log("maxW,maxH :>> ", maxW, maxH);
+
   if (image) {
     if (image.naturalWidth >= maxW || image.height >= maxH) {
       if (maxW / maxH > aspectRatio) {
@@ -205,11 +204,6 @@ function setImageInViewPort() {
       }
       image.width = maxW;
       image.height = maxH;
-      container.style.width = `${image.width}px`;
-      container.style.height = `${image.height}px`;
-    } else {
-      container.style.width = `${image.width}px`;
-      container.style.height = `${image.height}px`;
     }
 
     OrgImageSize.width = image.width;
