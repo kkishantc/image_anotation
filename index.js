@@ -7,8 +7,8 @@ var clickedId = null;
 var mainBody = document.getElementById("main-body");
 var container = document.getElementById("container");
 var image = document.getElementById("image");
-image.src = "./pexels-pedro-slinger-13519033.jpg";
-// image.src = "./cat.jpg";
+// image.src = "./pexels-pedro-slinger-13519033.jpg";
+image.src = "./cat.jpg";
 var maxW, maxH;
 
 var OrgImageSize = {
@@ -552,58 +552,15 @@ function makeResizable(_element, _objZone) {
 // Initialize all the zones for the current page
 function initZones() {
   let tempAllShape = [];
-  // tempAllShape.push({
-  //   slug: "94413",
-  //   type: "point",
-  //   x: 50,
-  //   y: 50,
-  // });
-  // tempAllShape.push({
-  //   slug: "94413",
-  //   type: "point",
-  //   x: 50,
-  //   y: 50,
-  // });
-  // tempAllShape.push({
-  //   slug: "94414",
-  //   type: "rectangle",
-  //   x: 29.6,
-  //   y: 37.7,
-  //   width: 18.2,
-  //   height: 40.67,
-  // });
-  // tempAllShape.push({
-  //   slug: "94414",
-  //   type: "rectangle",
-  //   x: 30,
-  //   y: 30,
-  //   width: 10,
-  //   height: 10,
-  // });
+  tempAllShape.push({
+    slug: "94414",
+    type: "rectangle",
+    x: 10,
+    y: 10,
+    width: 50,
+    height: 50,
+  });
 
-  // tempAllShape.push({
-  //   slug: "94414",
-  //   type: "rectangle",
-  //   width: 100,
-  //   height: 100,
-  //   x: 0,
-  //   y: 0,
-  // });
-
-  // tempAllShape.push({
-  //   slug: "94415",
-  //   type: "circle",
-  //   width: 10,
-  //   height: 15,
-  //   x: 55,
-  //   y: 55,
-  // });
-
-  // tempAllShape.push({slug:"94416",type:"rectangle",width:15,height:15,x:85,y:85})
-  // tempAllShape.push({slug:"94417",type:"rectangle",width:15,height:15,x:0,y:85})
-  // tempAllShape.push({slug:"94418",type:"rectangle",width:15,height:15,x:45,y:40})
-  // allShapes.push({ width: 1, height: 1, y: 77.70304388557624, x: 53.050270925895425, eventType: "point", slug: 010101 })
-  // allShapes = JSON.parse(localStorage.getItem("allShapes")) || [];
   if (tempAllShape.length > 0) {
     tempAllShape?.forEach((objZone) => {
       let { x, y } = PercentageToPx(objZone.x, objZone.y);
