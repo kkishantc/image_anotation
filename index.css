@@ -83,7 +83,7 @@
   width: 99%;
   height: 85%;
   position: absolute;
-  overflow: auto;
+  /* overflow: auto; */
   margin: 0px 5px;
   padding-bottom: 10px;
 }

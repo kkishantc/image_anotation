@@ -3,9 +3,13 @@ var allShapes = [];
 var allDetails = [];
 var rotationAngle = 0;
 var selectedId = null;
+var clickedId = null;
 var mainBody = document.getElementById("main-body");
+var container = document.getElementById("container");
 var image = document.getElementById("image");
 image.src = "./pexels-pedro-slinger-13519033.jpg";
+// image.src = "./cat.jpg";
+var maxW, maxH;
 
 var OrgImageSize = {
   width: 0,
@@ -89,6 +93,7 @@ function clearZone() {
 function zoomIn() {
   image.width += image.clientWidth * 0.1;
   image.height += image.clientHeight * 0.1;
+
   reDraw();
 }
 
@@ -110,6 +115,16 @@ function reDraw() {
   let mBody = document.getElementById("main-body");
   mBody.style.width = `${image.width}px`;
   mBody.style.height = `${image.height}px`;
+
+  if (image.width >= maxW || image.height >= maxH) {
+    container.style.overflow = "auto";
+    container.style.width = `${maxW}px`;
+    container.style.height = `${maxH}px`;
+  } else {
+    container.style.overflow = "visible";
+    container.style.width = `${image.width}px`;
+    container.style.height = `${image.height}px`;
+  }
   // let data = allShapes.map((objZone, index, array) => {
   //   console.log("objZone :>> ", objZone);
   //   let { x, y } = PercentageToPx(objZone.x, objZone.y);
@@ -129,6 +144,9 @@ function reDraw() {
   //   return objZone;
   // });
   // console.log("data :>> ", data);
+  let newShapes = new Array(...allShapes);
+  console.log("newShapes :>> ", newShapes);
+
   allShapes?.forEach((objZone) => {
     let ele = document.getElementById(`box${objZone.slug}`);
     ele.remove();
@@ -153,54 +171,106 @@ function getImageRatio(_imgElement) {
 }
 
 function setImageInViewPort() {
-  var tempImageWidth = 0;
-  var tempImageHeight = 0;
+  // var tempImageWidth = 0;
+  // var tempImageHeight = 0;
 
-  const imageNWidth = image.naturalWidth;
-  const imageNHeight = image.naturalHeight;
+  // const imageNWidth = image.naturalWidth;
+  // const imageNHeight = image.naturalHeight;
 
-  tempImageWidth = imageNWidth;
-  tempImageHeight = imageNHeight;
+  // tempImageWidth = imageNWidth;
+  // tempImageHeight = imageNHeight;
 
   const viewportWidth = window.innerWidth;
   const viewportHeight = window.innerHeight;
 
-  var tempViewportWidth = viewportWidth - viewportWidth * 0.2;
-  var tempViewportHeight = viewportHeight - viewportHeight * 0.2;
+  // var tempViewportWidth = viewportWidth;
+  // var tempViewportHeight = viewportHeight;
 
-  var tempViewportWidth = viewportWidth;
-  var tempViewportHeight = viewportHeight;
+  // calculate aspect ratio
+  let aspectRatio = image.width / image.height;
 
-  while (tempImageWidth >= tempViewportWidth) {
-    tempImageWidth = tempImageWidth - tempImageWidth * 0.1;
-  }
+  // calculate maximum width and height based on viewport and aspect ratio
 
-  while (tempImageHeight >= tempViewportHeight) {
-    tempImageHeight = tempImageHeight - tempImageHeight * 0.1;
-  }
-
+  // maxW = viewportWidth;
+  // maxW = viewportWidth;
+  maxW = viewportWidth * 0.8;
+  maxH = viewportHeight * 0.8;
+  console.log("maxW,maxH :>> ", maxW, maxH);
   if (image) {
-    tempImageHeight -= viewportHeight * 0.1;
-
-    image.width = tempImageWidth;
-    image.height = tempImageHeight + viewportHeight * 0.1;
-
-    OrgImageSize.width = tempImageWidth;
-    OrgImageSize.height = tempImageHeight + viewportHeight * 0.1;
-
-    let mBody = document.getElementById("main-body");
-    mBody.style.width = `${tempImageWidth}px`;
-    mBody.style.height = `${tempImageHeight}px`;
-
-    if (
-      imageNWidth >= tempViewportWidth ||
-      imageNHeight >= tempViewportHeight
-    ) {
-      let container = document.getElementById("container");
-      container.style.width = `${tempImageWidth}px`;
-      container.style.height = `${tempImageHeight}px`;
+    if (image.naturalWidth >= maxW || image.height >= maxH) {
+      if (maxW / maxH > aspectRatio) {
+        maxW = maxH * aspectRatio;
+      } else {
+        maxH = maxW / aspectRatio;
+      }
+      image.width = maxW;
+      image.height = maxH;
+      container.style.width = `${image.width}px`;
+      container.style.height = `${image.height}px`;
+    } else {
+      container.style.width = `${image.width}px`;
+      container.style.height = `${image.height}px`;
     }
+
+    OrgImageSize.width = image.width;
+    OrgImageSize.height = image.height;
   }
+
+  // var maxWidth = tempViewportWidth;
+  // var maxHeight = tempViewportHeight;
+  // var ratio = 0;
+  // var width = image.naturalWidth;
+  // var height = image.naturalHeight;
+  // if (width > height) {
+  //   console.log("width :>> ", width);
+  //   ratio = maxWidth / width;
+  //   console.log("ratio :>> ", ratio);
+  //   width = width * ratio;
+  // } else {
+  //   console.log("height :>> ", height);
+  //   ratio = maxHeight / height;
+  //   console.log("ratio :>> ", ratio);
+  //   height = height * ratio;
+  // }
+  // console.log("width,height :>> ", width, height);
+  // while (tempImageWidth >= tempViewportWidth) {
+  //   tempImageWidth = tempImageWidth - tempImageWidth * 0.1;
+  // }
+
+  // while (tempImageHeight >= tempViewportHeight) {
+  //   tempImageHeight = tempImageHeight - tempImageHeight * 0.1;
+  // }
+
+  // if (image) {
+  // set new width and height of image
+  // image.width = maxW;
+  // image.height = maxH;
+  // // image.width = "498";
+  // // image.height = "340";
+  // if (image.width >= viewportWidth || image.height >= viewportHeight) {
+  //   let container = document.getElementById("container");
+  //   container.style.width = `${image.width}px`;
+  //   container.style.height = `${image.height}px`;
+  // }
+  // OrgImageSize.width = maxW;
+  // OrgImageSize.height = maxH;
+  // tempImageHeight -= viewportHeight * 0.1;
+  // image.width = tempImageWidth;
+  // image.height = tempImageHeight + viewportHeight * 0.1;
+  // OrgImageSize.width = tempImageWidth;
+  // OrgImageSize.height = tempImageHeight + viewportHeight * 0.1;
+  // let mBody = document.getElementById("main-body");
+  // mBody.style.width = `${tempImageWidth}px`;
+  // mBody.style.height = `${tempImageHeight}px`;
+  // if (
+  //   imageNWidth >= tempViewportWidth ||
+  //   imageNHeight >= tempViewportHeight
+  // ) {
+  //   let container = document.getElementById("container");
+  //   container.style.width = `${tempImageWidth}px`;
+  //   container.style.height = `${tempImageHeight}px`;
+  // }
+  // }
 }
 
 window.onload = () => {
@@ -229,8 +299,7 @@ function newZone(_event) {
     };
     addZone(objZone);
     addZoneBox(objZone, _event);
-  }
-  if (eventType === "point") {
+  } else if (eventType === "point") {
     let { x, y } = getMousePos(image, _event);
     const objZone = {
       x,
@@ -240,8 +309,7 @@ function newZone(_event) {
     };
     addZone(objZone);
     addZoneBox(objZone, _event);
-  }
-  if (eventType === "circle") {
+  } else if (eventType === "circle") {
     let { x, y } = getMousePos(image, _event);
     const objZone = {
       x,
@@ -253,6 +321,8 @@ function newZone(_event) {
     };
     addZone(objZone);
     addZoneBox(objZone, _event);
+  } else {
+    clickedId = _event.target.id.toString().replace("link", "");
   }
   eventType = "";
 }
@@ -320,12 +390,23 @@ function addZoneBox(_objZone, _event) {
 
 // Make element draggable
 function makeDraggable(_element, _objZone) {
+  console.log("makeDraggable called");
   var pos1 = 0,
     pos2 = 0,
     pos3 = 0,
     pos4 = 0;
 
   // _element.onmousedown = dragMouseDown;
+  // if()
+  // console.log(
+  //   "image.width>=viewportWidth :>> ",
+  //   image.width <= window.viewportWidth
+  // );
+  // console.log(
+  //   "image.height>=viewportHeight :>> ",
+  //   image.height <= window.viewportHeight
+  // );
+
   _element.addEventListener("mousedown", dragMouseDown);
 
   function dragMouseDown(e) {
@@ -390,9 +471,12 @@ function makeDraggable(_element, _objZone) {
     const objZone = getZoneFromBox(_element);
 
     if (zoneOutsideImage(objZone)) {
-      deleteZone(objZone);
+      console.log("deleteZone called.");
+      deleteZone({ ...objZone });
     } else {
-      updateZone(objZone);
+      if (clickedId !== "image") {
+        updateZone(objZone);
+      }
     }
   }
 }
@@ -480,6 +564,28 @@ function initZones() {
   //   x: 50,
   //   y: 50,
   // });
+  // tempAllShape.push({
+  //   slug: "94413",
+  //   type: "point",
+  //   x: 50,
+  //   y: 50,
+  // });
+  // tempAllShape.push({
+  //   slug: "94414",
+  //   type: "rectangle",
+  //   x: 29.6,
+  //   y: 37.7,
+  //   width: 18.2,
+  //   height: 40.67,
+  // });
+  // tempAllShape.push({
+  //   slug: "94414",
+  //   type: "rectangle",
+  //   x: 30,
+  //   y: 30,
+  //   width: 10,
+  //   height: 10,
+  // });
 
   // tempAllShape.push({
   //   slug: "94414",
@@ -517,8 +623,12 @@ function initZones() {
         objZone.width = width;
         objZone.height = height;
       }
-      addZone(objZone);
-      addZoneBox(objZone);
+      if (zoneOutsideImage(objZone)) {
+        deleteZone(objZone);
+      } else {
+        addZone(objZone);
+        addZoneBox(objZone);
+      }
     });
   }
 }
