@@ -5,136 +5,344 @@ deleteImg.src = deleteIcon;
 var eventType = "";
 var allShapes = [];
 var allDetails = [];
-
-let imageURL = "./cat.jpg";
+var maxW, maxH;
+var OrgImageSize = {
+  width: 0,
+  height: 0,
+};
+var zoomLevel = 1;
+var canvasContainer = document.getElementById("canvas-container");
+let imageURL =
+  "https://cdn.pixabay.com/photo/2015/11/16/14/43/cat-1045782__340.jpg";
 let Canvas = document.getElementById("canvas");
 let popover = document.getElementById("popover");
-let image = new Image(imageURL);
+
+let image = document.createElement("img");
 image.src = imageURL;
+
+canvasContainer.style.width = `${image.naturalWidth}px`;
+canvasContainer.style.height = `${image.naturalHeight}px`;
+canvasContainer.style.overflow = "auto";
+
 Canvas.width = image.naturalWidth;
 Canvas.height = image.naturalHeight;
 
-// Initialize canvas variable
-var stroke = "black";
-var strokeWidth = 2;
-var cornerSize = 10;
-var cornerStyle = "rect";
-var cornerColor = "red";
-var fill = "rgba(0,0,0,0)";
-var transparentCorners = false;
-var objectCaching = false;
-var hasControls = true;
-var hasBorders = true;
-var selectable = true;
-
-var settings = {
-  stroke,
-  objectCaching,
-  strokeWidth,
-  cornerSize,
-  cornerStyle,
-  cornerColor,
-  transparentCorners,
-  hasControls,
-  hasBorders,
-  fill,
-  selectable,
-};
-// Initialize canvas
 var canvas = new fabric.Canvas("canvas");
-canvas.perPixelTargetFind = true;
-canvas.targetFindTolerance = 4;
+var strokeWidth = 3;
+var settings = {
+  stroke: "black",
+  objectCaching: false,
+  strokeWidth,
+  cornerSize: 5,
+  cornerStyle: "rect",
+  cornerColor: "red",
+  transparentCorners: false,
+  hasControls: true,
+  hasBorders: true,
+  fill: "rgba(0,0,0,0)",
+  selectable: true,
+};
 
-fabric.Image.fromURL(imageURL, function (img) {
-  img.set({
-    scaleX: canvas.width / img.width,
-    scaleY: canvas.height / img.height,
-    selectable: false,
+// const setImageInViewPort = () => {
+//   const viewportWidth = window.innerWidth;
+//   const viewportHeight = window.innerHeight;
+//   let aspectRatio = image.width / image.height;
+//   maxW = viewportWidth * 0.8;
+//   maxH = viewportHeight * 0.8;
+//   console.log("maxW,maxH :>> ", maxW, maxH);
+//   console.log(image.getBoundingClientRect());
+//   if (image) {
+//     if (image.naturalWidth >= maxW || image.naturalHeight >= maxH) {
+//       if (maxW / maxH > aspectRatio) {
+//         maxW = maxH * aspectRatio;
+//       } else {
+//         maxH = maxW / aspectRatio;
+//       }
+//       Canvas.width = maxW;
+//       Canvas.height = maxH;
+//       console.log(
+//         "Canvas.width,Canvas.height :>> ",
+//         Canvas.width,
+//         Canvas.height
+//       );
+//     }
+
+//     OrgImageSize.width = image.width;
+//     OrgImageSize.height = image.height;
+//   }
+// };
+
+const setImage = () => {
+  fabric.Image.fromURL(imageURL, function (img) {
+    console.log("img.width :>> ", img.width);
+    console.log("img.height :>> ", img.height);
+    img.set({
+      scaleX: Canvas.width / img.width,
+      scaleY: Canvas.height / img.height,
+      selectable: false,
+    });
+    canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
+      backgroundImageStretch: false,
+    });
   });
-  canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
-    backgroundImageStretch: false,
-  });
-});
+};
+window.onload = () => {
+  if (image.src) {
+    // setImageInViewPort();
+
+    canvas.perPixelTargetFind = true;
+    canvas.targetFindTolerance = 4;
+    setImage();
+    // let _shape = {
+    //   id: 85953,
+    //   type: "point",
+    //   // width: 1,
+    //   // height: 1,
+    //   x: 99,
+    //   y: 99,
+    // };
+    // drawPoint(_shape);
+  }
+};
+
+const getId = () => {
+  return Math.floor(Math.random().toFixed(5) * 100000);
+};
 
 const setType = (_type) => {
   eventType = _type;
-  if (eventType === "rectangle") {
-    drawRectangle();
-  } else if (eventType === "circle") {
-    drawCircle();
-  } else if (eventType === "point") {
-    drawPoint();
+  console.log("eventType :>> ", eventType);
+  if (eventType === "zoomIn") {
+    zoomIn();
+  } else if (eventType === "zoomOut") {
+    zoomOut();
+  } else if (eventType === "zoomReset") {
+    zoomReset();
+  } else if (eventType === "delete") {
+    deleteShape();
   }
-  eventType = null;
 };
 
-const drawRectangle = () => {
+// convert px To Percentage
+const pxToPercentage = (x, y) => {
+  let xPercent = parseFloat((x / Canvas.width) * 100);
+  let yPercent = parseFloat((y / Canvas.height) * 100);
+  return { x: xPercent, y: yPercent };
+};
+
+// // convert Percentage To Px
+const PercentageToPx = (x, y) => {
+  let orgX = parseFloat((x / 100) * Canvas.width);
+  let orgY = parseFloat((y / 100) * Canvas.height);
+  return { x: orgX, y: orgY };
+};
+
+const zoomIn = () => {
+  zoomLevel *= 1.1;
+  canvas.setZoom(zoomLevel);
+  reSetStrokeWidth();
+};
+const zoomOut = () => {
+  zoomLevel /= 1.1;
+  canvas.setZoom(zoomLevel);
+  reSetStrokeWidth();
+};
+const zoomReset = () => {
+  zoomLevel = 1;
+  canvas.setZoom(zoomLevel);
+  reSetStrokeWidth();
+};
+
+const drawRectangle = (shape) => {
+  let { x: left, y: top } = PercentageToPx(shape.x, shape.y);
+  let { x: width, y: height } = PercentageToPx(shape.width, shape.height);
   var rect = new fabric.Rect({
-    id: "1",
-    mouseUpHandler: handelMouseUp,
-    // mouseDownHandler: handelMouseDown,
-    // mouseMoveHandler: handelMouseMove,
-    left: 100,
-    top: 50,
-    width: 200,
-    height: 100,
+    id: shape.id,
+    type: shape.type,
+    left,
+    top,
+    width,
+    height,
     ...settings,
   });
-
   canvas.add(rect);
-  canvas.setActiveObject(rect);
+  shapeSave(shape);
+  // canvas.setActiveObject(rect);
 };
 
-const drawCircle = () => {
-  var circle = new fabric.Circle({
-    id: "2",
-    mouseUpHandler: handelMouseUp,
-    // mouseDownHandler: handelMouseDown,
-    // mouseMoveHandler: handelMouseMove,
-    left: 300,
-    top: 100,
-    radius: 50,
+const drawOval = (shape) => {
+  let { x: left, y: top } = PercentageToPx(shape.x, shape.y);
+  let { x: width, y: height } = PercentageToPx(shape.width, shape.height);
+  var oval = new fabric.Ellipse({
+    left,
+    top,
+    rx: width,
+    ry: height,
+    id: shape.id,
+    type: shape.type,
     ...settings,
   });
-  canvas.add(circle);
+  canvas.add(oval);
+  shapeSave(shape);
+  // canvas.setActiveObject(oval);
 };
 
-const drawPoint = () => {
-  var point = new fabric.Circle({
-    id: "3",
-    mouseUpHandler: handelMouseUp,
-    // mouseDownHandler: handelMouseDown,
-    // mouseMoveHandler: handelMouseMove,
-    left: 100,
-    top: 100,
-    radius: 5,
+const drawPoint = (shape) => {
+  let { x: left, y: top } = PercentageToPx(shape.x, shape.y);
+  let { x: rx, y: ry } = PercentageToPx(shape.width, shape.height);
+  var oval = new fabric.Ellipse({
+    left,
+    top,
+    rx,
+    ry,
+    id: shape.id,
+    type: shape.type,
     ...settings,
     hasControls: false,
     hasBorders: false,
     fill: "black",
   });
-  canvas.add(point);
+  canvas.add(oval);
+  shapeSave(shape);
 };
 
-const handelMouseUp = (eventData, transform) => {
-  var target = transform.target;
-  console.log("handelMouseUp target: ", target);
-};
+canvas.on("mouse:down", (e) => {
+  let { x, y } = e.absolutePointer;
+  let { x: XPercentage, y: YPercentage } = pxToPercentage(x, y);
+  if (eventType === "rectangle") {
+    let shape = {
+      id: getId(),
+      type: "rectangle",
+      x: XPercentage,
+      y: YPercentage,
+      width: 10,
+      height: 10,
+    };
+    drawRectangle(shape);
+  } else if (eventType === "oval") {
+    let shape = {
+      id: getId(),
+      type: "oval",
+      x: XPercentage,
+      y: YPercentage,
+      width: 5,
+      height: 5,
+    };
+    drawOval(shape);
+  } else if (eventType === "point") {
+    let shape = {
+      id: getId(),
+      type: "point",
+      x: XPercentage,
+      y: YPercentage,
+      width: 0.8,
+      height: 1,
+    };
+    drawPoint(shape);
+  }
+  eventType = null;
+});
 
-canvas.on("mouse:up", function (e) {
-  // Get selected shape object details
-  var activeObject = canvas.getActiveObject();
+canvas.on("mouse:up", (e) => {
+  const activeObject = canvas.getActiveObject();
   if (activeObject) {
-    openPopOver(activeObject);
+    SelectedShape(activeObject);
+    shapeUpdate(activeObject);
   }
 });
 
-const openPopOver = (object) => {
-  const { id, left, top, width, height } = object;
-  console.log("object :>> ", object);
-  console.log("popover :>> ", popover);
-  popover.style.display = "block";
-  popover.style.position = "absolute";
-  popover.style.top = `${top + height}px`;
-  popover.style.left = `${left}px`;
+canvas.on("object:scaling", function () {
+  var obj = canvas.getActiveObject(),
+    width = obj.width,
+    height = obj.height,
+    scaleX = obj.scaleX,
+    scaleY = obj.scaleY;
+  if (obj.ry || obj.rx) {
+    obj.set({
+      ry: obj.ry * scaleY,
+      rx: obj.rx * scaleX,
+      scaleX: 1,
+      scaleY: 1,
+    });
+  } else {
+    obj.set({
+      width: width * scaleX,
+      height: height * scaleY,
+      scaleX: 1,
+      scaleY: 1,
+    });
+  }
+});
+
+const reSetStrokeWidth = () => {
+  canvas.getObjects().forEach(function (object) {
+    if (object.type !== "point") {
+      object.set({
+        strokeWidth: 2 / zoomLevel,
+      });
+    } else {
+      object.set({
+        strokeWidth: 2 / zoomLevel,
+        ry: 4 / zoomLevel,
+        rx: 4 / zoomLevel,
+        scaleX: 1,
+        scaleY: 1,
+      });
+    }
+  });
+  canvas.renderAll();
 };
+
+const SelectedShape = (object) => {
+  console.log("SelectedShape object :>> ", object);
+};
+
+const deleteShape = () => {
+  const activeObject = canvas.getActiveObject();
+  console.log("activeObject :>> ", activeObject);
+  shapeDelete(activeObject);
+  canvas.remove(activeObject);
+  canvas.renderAll();
+};
+
+const shapeSave = (shape) => {
+  allShapes.push(shape);
+  console.log("shapeSave allShapes :>> ", allShapes);
+};
+
+const shapeDelete = (shape) => {
+  allShapes = allShapes.filter((item) => item.id !== shape.id);
+  console.log("shapeDelete allShapes :>> ", allShapes);
+};
+
+const shapeUpdate = (_shape) => {
+  let { x: XPercentage, y: YPercentage } = pxToPercentage(
+    _shape.left,
+    _shape.top
+  );
+  let { x: widthPercentage, y: heightPercentage } = pxToPercentage(
+    _shape.width,
+    _shape.height
+  );
+  let shape = {
+    id: _shape.id,
+    type: _shape.type,
+    x: XPercentage,
+    y: YPercentage,
+    width: widthPercentage,
+    height: heightPercentage,
+  };
+  allShapes = allShapes.map((item) => (item.id !== _shape.id ? item : shape));
+
+  console.log("shapeUpdate allShapes :>> ", allShapes);
+};
+
+// const openPopOver = (object) => {
+//   const { id, left, top, width, height } = object;
+//   console.log("object :>> ", object);
+//   // console.log("popover :>> ", popover);
+//   // popover.style.display = "block";
+//   // popover.style.position = "absolute";
+//   // popover.style.top = `${top + height}px`;
+//   // popover.style.left = `${left}px`;
+// };
