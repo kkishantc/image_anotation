@@ -1,0 +1,9 @@
+.canvas {
+  border: 1px solid red;
+}
+
+#popover {
+  display: none;
+  margin-top: 10px;
+  z-index: 1;
+}
