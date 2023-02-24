@@ -1,9 +1,17 @@
-.canvas {
-  /* border: 1px solid red; */
+#my-canvas {
+  border: 1px solid red;
 }
 
 #popover {
   display: none;
   margin-top: 10px;
   z-index: 1;
+}
+
+#main-body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin-top: 20px;
 }

@@ -68,18 +68,19 @@
             >
               Zoom Out <i class="fa fa-minus"></i>
             </button>
+            <button class="btn btn-outline-primary" onclick="setType('undo')">
+              Undo
+            </button>
+            <button class="btn btn-outline-primary" onclick="setType('redo')">
+              Redo
+            </button>
           </div>
         </div>
-        <div style="display: none">
-          <textarea name="ctrZones"></textarea>
-        </div>
-        <div id="container" class="">
-          <div id="main-body" style="position: absolute">
-            <div id="canvas-container">
-              <canvas id="canvas" class="canvas"></canvas>
-            </div>
+
+        <div id="container">
+          <div id="main-body">
             <!-- popover content -->
-            <div id="popover" class="">
+            <div id="popover">
               <div class="card" style="width: 15rem">
                 <div class="card-body">
                   <i class="fa-solid fa-xmark" onclick="handelClose();"></i>
@@ -125,6 +126,12 @@
           <ul id="annotationList"></ul>
         </div>
       </div>
+    </div>
+    <div
+      id="canvas-container"
+      class="d-flex align-items-center justify-content-center"
+    >
+      <canvas id="canvas" class="canvas"></canvas>
     </div>
   </body>
   <script src="./Home.js"></script>

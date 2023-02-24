@@ -10,22 +10,36 @@ var OrgImageSize = {
   width: 0,
   height: 0,
 };
+var shapeStates = {};
 var zoomLevel = 1;
-var canvasContainer = document.getElementById("canvas-container");
+var canvasContainer = document.getElementsByClassName("canvas-container");
+var upperCanvas = document.getElementsByClassName("upper-canvas");
 let imageURL =
   "https://cdn.pixabay.com/photo/2015/11/16/14/43/cat-1045782__340.jpg";
+// let imageURL =
+//   "https://images.pexels.com/photos/13519033/pexels-photo-13519033.jpeg";
 let Canvas = document.getElementById("canvas");
-let popover = document.getElementById("popover");
-
+var popover = document.getElementById("popover");
+var imageObj;
 let image = document.createElement("img");
+var CanvasSize = {
+  width: 0,
+  height: 0,
+};
 image.src = imageURL;
+Canvas.width = image.width;
+Canvas.height = image.height;
+var canvas = new fabric.Canvas("my-canvas", {
+  // selection: false,
+  // controlsAboveOverlay: true,
+  // centeredScaling: true,
+  // allowTouchScrolling: true,
+  // preserveObjectStacking: true,
+});
 
-canvasContainer.style.width = `${image.naturalWidth}px`;
-canvasContainer.style.height = `${image.naturalHeight}px`;
-canvasContainer.style.overflow = "auto";
-
-Canvas.width = image.naturalWidth;
-Canvas.height = image.naturalHeight;
+canvas.allowTouchScrolling = true;
+canvas.perPixelTargetFind = true;
+canvas.targetFindTolerance = 4;
 
 var canvas = new fabric.Canvas("canvas");
 var strokeWidth = 3;
@@ -41,67 +55,104 @@ var settings = {
   hasBorders: true,
   fill: "rgba(0,0,0,0)",
   selectable: true,
+  originX: "center",
+  originY: "center",
 };
-
-// const setImageInViewPort = () => {
-//   const viewportWidth = window.innerWidth;
-//   const viewportHeight = window.innerHeight;
-//   let aspectRatio = image.width / image.height;
-//   maxW = viewportWidth * 0.8;
-//   maxH = viewportHeight * 0.8;
-//   console.log("maxW,maxH :>> ", maxW, maxH);
-//   console.log(image.getBoundingClientRect());
-//   if (image) {
-//     if (image.naturalWidth >= maxW || image.naturalHeight >= maxH) {
-//       if (maxW / maxH > aspectRatio) {
-//         maxW = maxH * aspectRatio;
-//       } else {
-//         maxH = maxW / aspectRatio;
-//       }
-//       Canvas.width = maxW;
-//       Canvas.height = maxH;
-//       console.log(
-//         "Canvas.width,Canvas.height :>> ",
-//         Canvas.width,
-//         Canvas.height
-//       );
-//     }
-
-//     OrgImageSize.width = image.width;
-//     OrgImageSize.height = image.height;
-//   }
-// };
 
 const setImage = () => {
   fabric.Image.fromURL(imageURL, function (img) {
-    console.log("img.width :>> ", img.width);
-    console.log("img.height :>> ", img.height);
+    imageObj = img;
     img.set({
+      // left: 248,
+      // top: 170,
+      // originX: "center",
+      // originY: "center",
       scaleX: Canvas.width / img.width,
       scaleY: Canvas.height / img.height,
       selectable: false,
+      centeredRotation: true,
     });
     canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
       backgroundImageStretch: false,
     });
   });
 };
+
+const setImageInViewPort = () => {
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+  let aspectRatio = image.width / image.height;
+  maxW = viewportWidth * 0.8;
+  maxH = viewportHeight * 0.8;
+  if (image) {
+    if (image.naturalWidth >= maxW || image.height >= maxH) {
+      if (maxW / maxH > aspectRatio) {
+        maxW = maxH * aspectRatio;
+      } else {
+        maxH = maxW / aspectRatio;
+      }
+      console.log("maxW,maxH :>> ", maxW, maxH);
+      CanvasSize.width = maxW;
+      CanvasSize.height = maxH;
+      let canvases = new Array(...document.getElementsByClassName("canvas"));
+      let canvasContainer = new Array(
+        ...document.getElementsByClassName("canvas-container")
+      )[0];
+      // console.log("canvasContainer :>> ", canvasContainer);
+      // console.log("canvases :>> ", canvases);
+
+      // canvasContainer.width = CanvasSize.width;
+      // canvasContainer.height = CanvasSize.height;
+      canvasContainer.style.width = CanvasSize.width + "px";
+      canvasContainer.style.height = CanvasSize.height + "px";
+
+      canvases.forEach((value, index, array) => {
+        value.width = CanvasSize.width;
+        value.height = CanvasSize.height;
+        value.style.width = CanvasSize.width + "px";
+        value.style.height = CanvasSize.height + "px";
+      });
+
+      // canvasContainer[0].style.width = `${maxW}px`;
+      // canvasContainer[0].style.height = `${maxH}px`;
+      // canvasContainer[1].style.width = `${maxW}px`;
+      // canvasContainer[1].style.height = `${maxH}px`;
+      // upperCanvas[1].style.width = `${maxW}px`;
+      // upperCanvas[1].style.height = `${maxH}px`;
+      // upperCanvas[1].width = maxW;
+      // upperCanvas[1].height = maxH;
+      // canvas.setWidth(maxW);
+      // canvas.setHeight(maxH);
+      // canvasContainer.style.overflow = "auto";
+      // canvas.set({
+      //   width: 600,
+      //   height: 600,
+      // });
+      // canvas.renderAll();
+      // Canvas.style.width = maxW + "px";
+      // Canvas.style.height = maxH + "px";
+    }
+
+    // OrgImageSize.width = image.width;
+    // OrgImageSize.height = image.height;
+  }
+};
+
 window.onload = () => {
   if (image.src) {
     // setImageInViewPort();
-
-    canvas.perPixelTargetFind = true;
-    canvas.targetFindTolerance = 4;
     setImage();
-    // let _shape = {
-    //   id: 85953,
-    //   type: "point",
-    //   // width: 1,
-    //   // height: 1,
-    //   x: 99,
-    //   y: 99,
+    // console.log("maxW,maxH :>> ", w, h);
+
+    // let shape = {
+    //   id: getId(),
+    //   type: "rectangle",
+    //   x: 10,
+    //   y: 10,
+    //   width: 10,
+    //   height: 10,
     // };
-    // drawPoint(_shape);
+    // drawRectangle(shape);
   }
 };
 
@@ -120,8 +171,25 @@ const setType = (_type) => {
     zoomReset();
   } else if (eventType === "delete") {
     deleteShape();
+  } else if (eventType === "rotate") {
+    rotateShape();
+  } else if (eventType === "undo") {
+    undo();
+  } else if (eventType === "redo") {
+    redo();
   }
 };
+
+// const undo = () => {
+//   canvas.undo(function () {
+//     console.log("post undo");
+//   });
+// };
+// const redo = () => {
+//   canvas.redo(function () {
+//     console.log("post redo");
+//   });
+// };
 
 // convert px To Percentage
 const pxToPercentage = (x, y) => {
@@ -137,20 +205,118 @@ const PercentageToPx = (x, y) => {
   return { x: orgX, y: orgY };
 };
 
+var rotationAngle = 0;
+const rotateShape = () => {
+  rotationAngle += 90;
+  // var origItems = canvas._objects;
+
+  // var posNewCenter = fabric.util.rotatePoint(
+  //   new fabric.Point(600, 600),
+  //   canvas.getVpCenter(),
+  //   fabric.util.degreesToRadians(this.value)
+  // );
+  // origItems?.forEach(function (obj) {
+  //   obj.set({
+  //     angle: rotationAngle,
+  //   });
+  //   canvas.renderAll();
+  // });
+  // imageObj.set({ angle: rotationAngle });
+  // rotate the canvas
+  canvas.set({ angle: 45 });
+  canvas.renderAll();
+
+  // fabric.Image.set({ angle: 45 });
+  // canvas.renderAll();
+  // var center = canvas.getCenter();
+  // let group = undefined;
+  // if (group == undefined) {
+  //   var arr = [];
+  //   for (var i = 0; i < origItems.length; i++) {
+  //     arr.push(canvas.item(i).clone());
+  //   }
+  //   // group = new fabric.Group(arr);
+  //   group = new fabric.Group();
+  //   group.set({
+  //     width: canvas.getWidth(),
+  //     height: canvas.getHeight(),
+  //     top: center.top,
+  //     left: center.left,
+  //     angle: 90,
+  //   });
+  //   for (var i = 0; i < arr.length; i++) {
+  //     group.add(arr[i]);
+  //   }
+  //   canvas.clear().renderAll();
+  //   canvas.add(group);
+  // } else {
+  //   group.rotate(angleInDegrees);
+  // }
+  // let group = new fabric.Group();
+  // origItems.forEach((value, index, array) => {
+  //   group.add(value);
+  // });
+  // console.log("group :>> ", group);
+  // let angleInDegrees = 90;
+  // group.rotate(angleInDegrees);
+  // canvas.renderAll();
+
+  // var origItems = canvas._objects;
+  // // Group the two rectangles
+  // const group = new fabric.Group([...origItems], {
+  //   left: canvas.width / 2,
+  //   top: canvas.height / 2,
+  // });
+  // group.add(imageObj);
+
+  // // Set the rotation angle in degrees
+  // const rotationAngle = 45;
+
+  // // Rotate the group around its center
+  // fabric.util.rotateAroundOrigin(
+  //   group,
+  //   fabric.util.degreesToRadians(rotationAngle)
+  // );
+};
+
 const zoomIn = () => {
   zoomLevel *= 1.1;
   canvas.setZoom(zoomLevel);
   reSetStrokeWidth();
+
+  // const _zoomLevel = canvas.getZoom();
+  // const _width = canvas.getWidth() * _zoomLevel;
+  // const _height = canvas.getHeight() * _zoomLevel;
+  // canvas.setWidth(_width);
+  // canvas.setHeight(_height);
+  var _zoomLevel = canvas.getZoom();
+  console.log("_zoomLevel :>> ", _zoomLevel);
+  // var canvasWidth = canvas.getWidth() * _zoomLevel;
+  // var canvasHeight = canvas.getHeight() * _zoomLevel;
+  // canvas.setDimensions({ width: canvasWidth, height: canvasHeight });
 };
+
 const zoomOut = () => {
   zoomLevel /= 1.1;
   canvas.setZoom(zoomLevel);
   reSetStrokeWidth();
+
+  var _zoomLevel = canvas.getZoom();
+  var canvasWidth = canvas.getWidth() / _zoomLevel;
+  var canvasHeight = canvas.getHeight() / _zoomLevel;
+  canvas.setDimensions({ width: canvasWidth, height: canvasHeight });
 };
+
 const zoomReset = () => {
   zoomLevel = 1;
   canvas.setZoom(zoomLevel);
+  canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
   reSetStrokeWidth();
+
+  var _zoomLevel = canvas.getZoom();
+  var canvasWidth = canvas.getWidth() * _zoomLevel;
+  var canvasHeight = canvas.getHeight() * _zoomLevel;
+  canvas.setDimensions({ width: canvasWidth, height: canvasHeight });
 };
 
 const drawRectangle = (shape) => {
@@ -251,6 +417,74 @@ canvas.on("mouse:up", (e) => {
   }
 });
 
+canvas.on("mouse:wheel", function (opt) {
+  var delta = opt.e.deltaY;
+  var zoom = canvas.getZoom();
+  zoom *= 0.999 ** delta;
+  if (zoom > 20) zoom = 20;
+  if (zoom < 0.01) zoom = 0.01;
+  canvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
+  opt.e.preventDefault();
+  opt.e.stopPropagation();
+
+  var vpt = this.viewportTransform;
+  if (zoom < 400 / 1000) {
+    vpt[4] = 200 - (1000 * zoom) / 2;
+    vpt[5] = 200 - (1000 * zoom) / 2;
+  } else {
+    if (vpt[4] >= 0) {
+      vpt[4] = 0;
+    } else if (vpt[4] < canvas.getWidth() - 1000 * zoom) {
+      vpt[4] = canvas.getWidth() - 1000 * zoom;
+    }
+    if (vpt[5] >= 0) {
+      vpt[5] = 0;
+    } else if (vpt[5] < canvas.getHeight() - 1000 * zoom) {
+      vpt[5] = canvas.getHeight() - 1000 * zoom;
+    }
+  }
+  reSetStrokeWidth();
+});
+
+// canvas.on("object:modified", function (event) {
+//   var shape = event.target;
+//   var currentState = JSON.stringify(shape.toObject());
+//   if (!shapeStates[shape.id]) {
+//     shapeStates[shape.id] = [currentState];
+//   } else {
+//     shapeStates[shape.id].push(currentState);
+//   }
+//   console.log("shapeStates :>> ", shapeStates);
+// });
+
+// allow the user to undo modifications by restoring previous states for each shape
+function undo() {
+  // for (var id in shapeStates) {
+  //   var states = shapeStates[id];
+  //   if (states.length > 1) {
+  //     var shape = canvas.getObjectById(id);
+  //     var previousState = JSON.parse(states[states.length - 2]);
+  //     shapeStates[id].pop();
+  //     shape.set(previousState);
+  //   }
+  // }
+  // canvas.renderAll();
+}
+
+// allow the user to redo modifications by restoring next states for each shape
+function redo() {
+  // for (var id in shapeStates) {
+  //   var states = shapeStates[id];
+  //   if (states.length > 1) {
+  //     var shape = canvas.getObjectById(id);
+  //     var nextState = JSON.parse(states[states.length - 1]);
+  //     shapeStates[id].pop();
+  //     shape.set(nextState);
+  //   }
+  // }
+  // canvas.renderAll();
+}
+
 canvas.on("object:scaling", function () {
   var obj = canvas.getActiveObject(),
     width = obj.width,
@@ -295,6 +529,7 @@ const reSetStrokeWidth = () => {
 
 const SelectedShape = (object) => {
   console.log("SelectedShape object :>> ", object);
+  // openPopOver(object);
 };
 
 const deleteShape = () => {
@@ -337,12 +572,12 @@ const shapeUpdate = (_shape) => {
   console.log("shapeUpdate allShapes :>> ", allShapes);
 };
 
-// const openPopOver = (object) => {
-//   const { id, left, top, width, height } = object;
-//   console.log("object :>> ", object);
-//   // console.log("popover :>> ", popover);
-//   // popover.style.display = "block";
-//   // popover.style.position = "absolute";
-//   // popover.style.top = `${top + height}px`;
-//   // popover.style.left = `${left}px`;
-// };
+const openPopOver = (object) => {
+  const { id, left, top, width, height } = object;
+  console.log("object :>> ", object);
+  console.log("popover :>> ", popover);
+  popover.style.display = "block";
+  popover.style.position = "absolute";
+  popover.style.top = `${top + height}px`;
+  popover.style.left = `${left}px`;
+};

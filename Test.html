@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Draw rectangle on mouse drag</title>
+    <style>
+      #container {
+        position: relative;
+        display: inline-block;
+      }
+
+      #canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <img src="https://picsum.photos/id/237/536/354" id="image" />
+      <canvas id="canvas"></canvas>
+    </div>
+
+    <script>
+      const image = document.getElementById("image");
+      const canvas = document.getElementById("canvas");
+      const ctx = canvas.getContext("2d");
+
+      canvas.width = image.width;
+      canvas.height = image.height;
+
+      image.addEventListener("click", function (e) {
+        const x = e.offsetX;
+        const y = e.offsetY;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // draw a circle
+        ctx.beginPath();
+        ctx.strokeStyle = "red";
+        ctx.arc(x, y, 10, 0, 2 * Math.PI);
+        ctx.stroke();
+
+        // draw a point
+        ctx.fillStyle = "blue";
+        ctx.fillRect(x - 2, y - 2, 4, 4);
+
+        // draw a rectangle
+        ctx.strokeStyle = "green";
+        ctx.strokeRect(x - 20, y - 20, 40, 40);
+      });
+    </script>
+  </body>
+</html>
