@@ -1,9 +1,6 @@
 .controls {
   margin: 10px 0px;
 }
-.imagePortrait {
-  /* box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19); */
-}
 
 .box:focus {
   border: 1px solid rgb(223, 70, 70);
@@ -19,7 +16,7 @@
   border: 3px solid rgb(0, 0, 0);
 }
 
-.circle {
+.oval {
   border-radius: 50%;
 }
 .point {
@@ -38,35 +35,99 @@
   cursor: nwse-resize;
 }
 
-.resizer-right {
-  width: 5px;
-  height: 100%;
+.resizer-left {
+  width: 10px;
+  height: 10px;
   background: transparent;
   position: absolute;
-  right: 0;
-  bottom: 0;
-  cursor: e-resize;
+  left: -6px;
+  bottom: 50%;
+  cursor: ew-resize;
+}
+
+.boxNotActive:hover .resize-bottom-right,
+.boxNotActive:hover .resize-bottom-left,
+.boxNotActive:hover .resize-top-right,
+.boxNotActive:hover .resize-top-left,
+.boxNotActive:hover .resizer-top,
+.boxNotActive:hover .resizer-bottom,
+.boxNotActive:hover .resizer-left,
+.boxNotActive:hover .resizer-right {
+  border: 1px solid rgb(255, 0, 0);
+}
+
+.resizer-right {
+  width: 10px;
+  height: 10px;
+  background: transparent;
+  position: absolute;
+  right: -6px;
+  bottom: 50%;
+  cursor: ew-resize;
+}
+
+.resizer-top {
+  width: 10px;
+  height: 10px;
+  background: transparent;
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  cursor: ns-resize;
 }
 
 .resizer-bottom {
-  width: 100%;
-  height: 5px;
+  width: 10px;
+  height: 10px;
   background: transparent;
   position: absolute;
-  right: 0;
-  bottom: 0;
-  cursor: n-resize;
+  right: 50%;
+  bottom: -6px;
+  cursor: ns-resize;
 }
 
-.resizer-both {
-  width: 5px;
-  height: 5px;
+.resize-top-left {
+  width: 10px;
+  height: 10px;
   background: transparent;
   z-index: 10;
   position: absolute;
-  right: 0;
-  bottom: 0;
-  cursor: nw-resize;
+  top: -6px;
+  left: -6px;
+  cursor: nwse-resize;
+}
+
+.resize-top-right {
+  width: 10px;
+  height: 10px;
+  background: transparent;
+  z-index: 10;
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  cursor: nesw-resize;
+}
+
+.resize-bottom-left {
+  width: 10px;
+  height: 10px;
+  background: transparent;
+  z-index: 10;
+  position: absolute;
+  bottom: -6px;
+  left: -6px;
+  cursor: nesw-resize;
+}
+
+.resize-bottom-right {
+  width: 10px;
+  height: 10px;
+  background: transparent;
+  z-index: 10;
+  position: absolute;
+  bottom: -6px;
+  right: -6px;
+  cursor: nwse-resize;
 }
 
 .details {
@@ -80,16 +141,21 @@
 }
 
 #container {
-  width: 99%;
-  height: 85%;
+  /* width: 99%;
+  height: 85%; */
   position: absolute;
-  overflow: auto;
+  /* overflow: auto; */
   margin: 0px 5px;
   padding-bottom: 10px;
 }
+.main-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
 #main-body {
-  transform-origin: 0% 0%;
+  position: absolute;
 }
 
 .fa-xmark {

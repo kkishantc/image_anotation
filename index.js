@@ -7,8 +7,8 @@ var clickedId = null;
 var mainBody = document.getElementById("main-body");
 var container = document.getElementById("container");
 var image = document.getElementById("image");
-// image.src = "./pexels-pedro-slinger-13519033.jpg";
-image.src = "./cat.jpg";
+image.src = "./pexels-pedro-slinger-13519033.jpg";
+// image.src = "./cat.jpg";
 var maxW, maxH;
 
 var OrgImageSize = {
@@ -29,7 +29,7 @@ function setType(_type) {
   if (eventType === "clear") {
     clearZone();
   }
-  if (eventType === "erase") {
+  if (eventType === "delete") {
     mainBody.addEventListener("click", eraseZone);
   }
   if (eventType === "rotate") {
@@ -49,8 +49,8 @@ function setType(_type) {
 
 function rotateImage(mainBody) {
   let container = mainBody;
-  container.style.transformOrigin = "50% 73%";
-  // container.style.transformOrigin = "center";
+  // container.style.transformOrigin = "50% 73%";
+  container.style.transformOrigin = "center";
   container.style.transform = `rotate(${rotationAngle}deg)`;
 
   if (rotationAngle >= 360) {
@@ -91,6 +91,10 @@ function clearZone() {
 }
 
 function zoomIn() {
+  image.click();
+  if (selectedId) {
+    closePopOver(selectedId);
+  }
   image.width += image.clientWidth * 0.1;
   image.height += image.clientHeight * 0.1;
   reDraw();
@@ -98,6 +102,10 @@ function zoomIn() {
 
 function zoomOut() {
   if (image.width >= 150 || image.height >= 150) {
+    image.click();
+    if (selectedId) {
+      closePopOver(selectedId);
+    }
     image.width -= image.clientWidth * 0.1;
     image.height -= image.clientHeight * 0.1;
     reDraw();
@@ -105,46 +113,17 @@ function zoomOut() {
 }
 
 function zoomReset() {
+  image.click();
   image.width = OrgImageSize.width;
   image.height = OrgImageSize.height;
   reDraw();
 }
 
 function reDraw() {
+  console.log("reDraw called");
   let mBody = document.getElementById("main-body");
   mBody.style.width = `${image.width}px`;
   mBody.style.height = `${image.height}px`;
-
-  // if (image.width >= maxW || image.height >= maxH) {
-  //   container.style.overflow = "auto";
-  //   container.style.width = `${maxW}px`;
-  //   container.style.height = `${maxH}px`;
-  // } else {
-  //   container.style.overflow = "visible";
-  //   container.style.width = `${image.width}px`;
-  //   container.style.height = `${image.height}px`;
-  // }
-  // let data = allShapes.map((objZone, index, array) => {
-  //   console.log("objZone :>> ", objZone);
-  //   let { x, y } = PercentageToPx(objZone.x, objZone.y);
-  //   let { x: width, y: height } = PercentageToPx(objZone.width, objZone.height);
-  //   let { x: a, y: b } = pxToPercentage(x, y);
-  //   let { x: c, y: d } = pxToPercentage(width, height);
-  //   objZone.x = a;
-  //   objZone.y = b;
-  //   if (objZone.type !== "point") {
-  //     objZone.width = c;
-  //     objZone.height = d;
-  //   }
-  //   let ele = document.getElementById(`box${objZone.slug}`);
-  //   ele.remove();
-  //   updateZone(objZone);
-  //   addZoneBox(objZone);
-  //   return objZone;
-  // });
-  // console.log("data :>> ", data);
-  let newShapes = new Array(...allShapes);
-  console.log("newShapes :>> ", newShapes);
 
   allShapes?.forEach((objZone) => {
     let ele = document.getElementById(`box${objZone.slug}`);
@@ -269,8 +248,8 @@ function setImageInViewPort() {
 
 window.onload = () => {
   if (image.src) {
-    OrgImageSize.width = image.width;
-    OrgImageSize.height = image.height;
+    OrgImageSize.width = image.naturalWidth;
+    OrgImageSize.height = image.naturalHeight;
     setImageInViewPort();
     initZones();
   }
@@ -303,7 +282,7 @@ function newZone(_event) {
     };
     addZone(objZone);
     addZoneBox(objZone, _event);
-  } else if (eventType === "circle") {
+  } else if (eventType === "oval") {
     let { x, y } = getMousePos(image, _event);
     const objZone = {
       x,
@@ -311,7 +290,7 @@ function newZone(_event) {
       width: 50,
       height: 50,
       slug: getNextZoneSequence(),
-      type: "circle",
+      type: "oval",
     };
     addZone(objZone);
     addZoneBox(objZone, _event);
@@ -323,12 +302,12 @@ function newZone(_event) {
 
 function isMouseInShape(event, mx, my, shape) {
   // if (shape.radius) {
-  //     // this is a circle
+  //     // this is a oval
   //     var dx = mx - shape.x;
   //     var dy = my - shape.y;
-  //     // math test to see if mouse is inside circle
+  //     // math test to see if mouse is inside oval
   //     if (dx * dx + dy * dy < shape.radius * shape.radius) {
-  //         // yes, mouse is inside this circle
+  //         // yes, mouse is inside this oval
   //         return (true);
   //     }
   // } else if (shape.width) {
@@ -353,8 +332,8 @@ function isMouseInShape(event, mx, my, shape) {
 function addZoneBox(_objZone, _event) {
   const theDiv = document.createElement("div");
   theDiv.className =
-    _objZone.type === "circle" || _objZone.type === "point"
-      ? "boxNotActive circle"
+    _objZone.type === "oval" || _objZone.type === "point"
+      ? "boxNotActive oval"
       : "boxNotActive";
   if (_objZone.type === "point") {
     theDiv.classList.add("point");
@@ -384,78 +363,66 @@ function addZoneBox(_objZone, _event) {
 
 // Make element draggable
 function makeDraggable(_element, _objZone) {
-  console.log("makeDraggable called");
+  var isDown;
+  _element.addEventListener("mousedown", handelMouseDown);
   var pos1 = 0,
     pos2 = 0,
     pos3 = 0,
     pos4 = 0;
 
-  // _element.onmousedown = dragMouseDown;
-  // if()
-  // console.log(
-  //   "image.width>=viewportWidth :>> ",
-  //   image.width <= window.viewportWidth
-  // );
-  // console.log(
-  //   "image.height>=viewportHeight :>> ",
-  //   image.height <= window.viewportHeight
-  // );
+  function handelMouseDown(e) {
+    isDown = true;
+    let { x, y } = getMousePos(mainBody, e);
+    pos3 = x;
+    pos4 = y;
+    _element.addEventListener("mouseup", handelMouseUp);
+    document.addEventListener("mousemove", handelMouseMove);
 
-  _element.addEventListener("mousedown", dragMouseDown);
-
-  function dragMouseDown(e) {
-    e = e || window.event;
-    // get the mouse cursor position at startup:
-    pos3 = e.clientX;
-    pos4 = e.clientY;
-    // Save the original x and y
-    _element.orgLeft = _element.style.left;
-    _element.orgTop = _element.style.top;
-    // document.onmouseup = closeDragElement;
-    document.addEventListener("mouseup", closeDragElement);
-    // call a function whenever the cursor moves:
-    document.onmousemove = elementDrag;
     _element.className =
-      _objZone.type === "circle" || _objZone.type === "point"
-        ? "box circle"
+      _objZone.type === "oval" || _objZone.type === "point"
+        ? "box oval"
         : "box";
     if (_objZone.type === "point") {
       _element.classList.add("point");
     }
   }
 
-  function elementDrag(e) {
-    let popover = document.getElementById("popover");
-    popover.style.position = "absolute";
-    popover.style.top = `${0}px`;
-    popover.style.left = `${0}px`;
-    popover.style.display = "none";
+  function handelMouseMove(e) {
+    if (isDown) {
+      let popover = document.getElementById("popover");
+      popover.style.position = "absolute";
+      popover.style.top = `${0}px`;
+      popover.style.left = `${0}px`;
+      popover.style.display = "none";
 
+      if (!_element) {
+        return;
+      }
+
+      let { x, y } = getMousePos(mainBody, e);
+      pos1 = pos3 - x;
+      pos2 = pos4 - y;
+      pos3 = x;
+      pos4 = y;
+      _element.style.top = `${_element.offsetTop - pos2}px`;
+      _element.style.left = `${_element.offsetLeft - pos1}px`;
+      _element.style.border = "3px solid red";
+    }
+  }
+
+  function handelMouseUp(e) {
+    isDown = false;
     if (!_element) {
       return;
     }
 
-    e = e || window.event;
-    // calculate the new cursor position:
-    pos1 = pos3 - e.clientX;
-    pos2 = pos4 - e.clientY;
-    pos3 = e.clientX;
-    pos4 = e.clientY;
-    // set the element's new position:
-    _element.style.top = `${_element.offsetTop - pos2}px`;
-    _element.style.left = `${_element.offsetLeft - pos1}px`;
-    _element.style.border = "3px solid red";
-  }
-
-  function closeDragElement() {
-    /* stop moving when mouse button is released:*/
     document.onmouseup = null;
     document.onmousemove = null;
     document.onmousedown = null;
 
     _element.className =
-      _objZone.type === "circle" || _objZone.type === "point"
-        ? "boxNotActive circle"
+      _objZone.type === "oval" || _objZone.type === "point"
+        ? "boxNotActive oval"
         : "boxNotActive";
 
     if (_objZone.type === "point") {
@@ -468,6 +435,7 @@ function makeDraggable(_element, _objZone) {
       console.log("deleteZone called.");
       deleteZone({ ...objZone });
     } else {
+      console.log("calling updateZone");
       if (clickedId !== "image") {
         updateZone(objZone);
       }
@@ -475,31 +443,95 @@ function makeDraggable(_element, _objZone) {
   }
 }
 
-// Make element resizable by adding dummy dives to the right and to the bottom of element
 function makeResizable(_element, _objZone) {
-  var startX, startY, startWidth, startHeight;
+  var startX, startY, className;
+  function addResizeHandles() {
+    const left = document.createElement("div");
+    left.className = "resizer-left";
+    _element.appendChild(left);
+    left.addEventListener(
+      "mousedown",
+      (e) => initDrag(e, "resizer-left"),
+      false
+    );
+    left.parentPopup = _element;
 
-  var right = document.createElement("div");
-  right.className = "resizer-right";
-  _element.appendChild(right);
-  right.addEventListener("mousedown", initDrag, false);
-  right.parentPopup = _element;
+    const right = document.createElement("div");
+    right.className = "resizer-right";
+    _element.appendChild(right);
+    right.addEventListener(
+      "mousedown",
+      (e) => initDrag(e, "resizer-right"),
+      false
+    );
+    right.parentPopup = _element;
 
-  var bottom = document.createElement("div");
-  bottom.className = "resizer-bottom";
-  _element.appendChild(bottom);
-  bottom.addEventListener("mousedown", initDrag, false);
-  bottom.parentPopup = _element;
+    const top = document.createElement("div");
+    top.className = "resizer-top";
+    _element.appendChild(top);
+    top.addEventListener("mousedown", (e) => initDrag(e, "resizer-top"), false);
+    top.parentPopup = _element;
 
-  var both = document.createElement("div");
-  both.className = "resizer-both";
-  _element.appendChild(both);
-  both.addEventListener("mousedown", initDrag, false);
-  both.parentPopup = _element;
+    const bottom = document.createElement("div");
+    bottom.className = "resizer-bottom";
+    _element.appendChild(bottom);
+    bottom.addEventListener(
+      "mousedown",
+      (e) => initDrag(e, "resizer-bottom"),
+      false
+    );
+    bottom.parentPopup = _element;
 
-  function initDrag(e) {
+    if (_objZone.type !== "oval") {
+      const handleTopLeft = document.createElement("div");
+      handleTopLeft.className = "resize-top-left";
+      _element.appendChild(handleTopLeft);
+      handleTopLeft.addEventListener(
+        "mousedown",
+        (e) => initDrag(e, "resize-top-left"),
+        false
+      );
+      handleTopLeft.parentPopup = _element;
+
+      const handleTopRight = document.createElement("div");
+      handleTopRight.className = "resize-top-right";
+      _element.appendChild(handleTopRight);
+      handleTopRight.addEventListener(
+        "mousedown",
+        (e) => initDrag(e, "resize-top-right"),
+        false
+      );
+      handleTopRight.parentPopup = _element;
+
+      const handleBottomLeft = document.createElement("div");
+      handleBottomLeft.className = "resize-bottom-left";
+      _element.appendChild(handleBottomLeft);
+      handleBottomLeft.addEventListener(
+        "mousedown",
+        (e) => initDrag(e, "resize-bottom-left"),
+        false
+      );
+      handleBottomLeft.parentPopup = _element;
+
+      const handleBottomRight = document.createElement("div");
+      handleBottomRight.className = "resize-bottom-right";
+      _element.appendChild(handleBottomRight);
+      handleBottomRight.addEventListener(
+        "mousedown",
+        (e) => initDrag(e, "resize-bottom-right"),
+        false
+      );
+      handleBottomRight.parentPopup = _element;
+    }
+  }
+
+  addResizeHandles();
+
+  function initDrag(e, _className) {
+    className = _className;
     startX = e.clientX;
     startY = e.clientY;
+
     e.stopPropagation();
     startWidth = parseFloat(
       document.defaultView.getComputedStyle(_element).width,
@@ -509,12 +541,13 @@ function makeResizable(_element, _objZone) {
       document.defaultView.getComputedStyle(_element).height,
       10
     );
+
     document.documentElement.addEventListener("mousemove", doDrag, false);
     document.documentElement.addEventListener("mouseup", stopDrag, false);
 
     _element.className =
-      _objZone.type === "circle" || _objZone.type === "point"
-        ? "box circle"
+      _objZone.type === "oval" || _objZone.type === "point"
+        ? "box oval"
         : "box";
     if (_objZone.type === "point") {
       _element.classList.add("point");
@@ -522,15 +555,46 @@ function makeResizable(_element, _objZone) {
   }
 
   function doDrag(e) {
+    e.stopPropagation();
+
     let popover = document.getElementById("popover");
     popover.style.position = "absolute";
     popover.style.top = `${0}px`;
     popover.style.left = `${0}px`;
     popover.style.display = "none";
 
-    e.stopPropagation();
-    _element.style.width = `${startWidth + e.clientX - startX}px`;
-    _element.style.height = `${startHeight + e.clientY - startY}px`;
+    const diffX = e.clientX - startX;
+    const diffY = e.clientY - startY;
+
+    if (className === "resizer-top") {
+      _element.style.height = `${_element.offsetHeight - diffY}px`;
+      _element.style.top = `${_element.offsetTop + diffY}px`;
+    } else if (className === "resizer-right") {
+      _element.style.width = `${_element.offsetWidth + diffX}px`;
+    } else if (className === "resizer-left") {
+      _element.style.width = `${_element.offsetWidth - diffX}px`;
+      _element.style.left = `${_element.offsetLeft + diffX}px`;
+    } else if (className === "resizer-bottom") {
+      _element.style.height = `${_element.offsetHeight + diffY}px`;
+    } else if (className === "resize-top-left") {
+      _element.style.width = `${_element.offsetWidth - diffX}px`;
+      _element.style.left = `${_element.offsetLeft + diffX}px`;
+      _element.style.height = `${_element.offsetHeight - diffY}px`;
+      _element.style.top = `${_element.offsetTop + diffY}px`;
+    } else if (className === "resize-top-right") {
+      _element.style.width = `${_element.offsetWidth + diffX}px`;
+      _element.style.height = `${_element.offsetHeight - diffY}px`;
+      _element.style.top = `${_element.offsetTop + diffY}px`;
+    } else if (className === "resize-bottom-left") {
+      _element.style.width = `${_element.offsetWidth - diffX}px`;
+      _element.style.left = `${_element.offsetLeft + diffX}px`;
+      _element.style.height = `${_element.offsetHeight + diffY}px`;
+    } else if (className === "resize-bottom-right") {
+      _element.style.width = `${_element.offsetWidth + diffX}px`;
+      _element.style.height = `${_element.offsetHeight + diffY}px`;
+    }
+    startX = e.clientX;
+    startY = e.clientY;
   }
 
   function stopDrag() {
@@ -538,18 +602,17 @@ function makeResizable(_element, _objZone) {
     document.documentElement.removeEventListener("mouseup", stopDrag, false);
 
     _element.className =
-      _objZone.type === "circle" || _objZone.type === "point"
-        ? "boxNotActive circle"
+      _objZone.type === "oval" || _objZone.type === "point"
+        ? "boxNotActive oval"
         : "boxNotActive";
     if (_objZone.type === "point") {
       _element.classList.add("point");
     }
-
+    image.click();
     updateZone(getZoneFromBox(_element));
   }
 }
 
-// Initialize all the zones for the current page
 function initZones() {
   let tempAllShape = [];
   tempAllShape.push({
@@ -599,10 +662,10 @@ function getZoneFromBox(_element) {
       objReturn = objZone;
 
       // Make sure coordinates still in line with image on the screen
-      objReturn.x = getX(_element.style.left);
-      objReturn.y = getX(_element.style.top);
-      objReturn.width = getX(_element.style.width);
-      objReturn.height = getX(_element.style.height);
+      objReturn.x = getPixels(_element.style.left);
+      objReturn.y = getPixels(_element.style.top);
+      objReturn.width = getPixels(_element.style.width);
+      objReturn.height = getPixels(_element.style.height);
       objReturn.type = objZone.type;
     }
   });
@@ -624,7 +687,7 @@ function zoneOutsideImage(_objZone) {
 }
 
 // Get pixels from a style
-function getX(_x) {
+function getPixels(_x) {
   try {
     const intReturn = parseFloat(_x.replace("px", ""));
     return intReturn;
@@ -790,6 +853,7 @@ function selectBox(ID) {
   if (eventType === "") {
     let _id = Number(ID);
     if (selectedId === _id) {
+      image.click();
       const boxes = document.querySelectorAll(".boxNotActive");
       boxes.forEach((box) => {
         box.style.border = "3px solid black";
@@ -830,6 +894,7 @@ function selectBox(ID) {
 
 // open popover
 function openPopOver(_selectedId) {
+  image.click();
   let _shape = allShapes.filter(
     (item) => item.slug == _selectedId.toString()
   )[0];
@@ -893,6 +958,7 @@ function closePopOver(ID) {
   popover.style.display = "none";
 
   selectedId = null;
+  image.click();
 }
 
 // close popover
