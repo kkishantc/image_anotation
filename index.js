@@ -7,8 +7,8 @@ var clickedId = null;
 var mainBody = document.getElementById("main-body");
 var container = document.getElementById("container");
 var image = document.getElementById("image");
-image.src = "./pexels-pedro-slinger-13519033.jpg";
-// image.src = "./cat.jpg";
+// image.src = "./pexels-pedro-slinger-13519033.jpg";
+image.src = "./cat.jpg";
 var maxW, maxH;
 
 var OrgImageSize = {
@@ -74,6 +74,9 @@ function eraseZone(e) {
   const arrZones = getZones();
   let { x, y } = getMousePos(image, e);
   let shape = arrZones.filter((value) => isMouseInShape(e, x, y, value));
+  if (selectedId) {
+    closePopOver(selectedId);
+  }
   deleteZone(shape[0]);
   eventType = "";
   mainBody.removeEventListener("click", eraseZone);
@@ -183,10 +186,12 @@ function setImageInViewPort() {
       }
       image.width = maxW;
       image.height = maxH;
+      console.log("image.width,image.height :>> ", image.width, image.height);
     }
 
     OrgImageSize.width = image.width;
     OrgImageSize.height = image.height;
+    console.log("image.width,image.height :>> ", image.width, image.height);
   }
 
   // var maxWidth = tempViewportWidth;
@@ -330,6 +335,7 @@ function isMouseInShape(event, mx, my, shape) {
 
 // Draw the box on the screen for given zone
 function addZoneBox(_objZone, _event) {
+  console.log("_objZone :>> ", _objZone);
   const theDiv = document.createElement("div");
   theDiv.className =
     _objZone.type === "oval" || _objZone.type === "point"
@@ -618,10 +624,10 @@ function initZones() {
   tempAllShape.push({
     slug: "94414",
     type: "rectangle",
-    x: 10,
-    y: 10,
-    width: 50,
-    height: 50,
+    x: 0,
+    y: 0,
+    width: 10,
+    height: 10,
   });
 
   if (tempAllShape.length > 0) {
@@ -699,6 +705,7 @@ function getPixels(_x) {
 // Replace zone with zone passed as parameter
 function updateZone(_objZone) {
   console.log("updateZone");
+  console.log("_objZone :>> ", _objZone);
   if (eventType !== "erase" || (eventType !== "clear" && eventType === "")) {
     const arrZones = new Array();
     console.log("_objZone :>> ", _objZone);
