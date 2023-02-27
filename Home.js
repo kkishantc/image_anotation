@@ -10,15 +10,16 @@ var OrgImageSize = {
   width: 0,
   height: 0,
 };
+var Canvas;
 var shapeStates = {};
 var zoomLevel = 1;
 var canvasContainer = document.getElementsByClassName("canvas-container");
 var upperCanvas = document.getElementsByClassName("upper-canvas");
-let imageURL =
-  "https://cdn.pixabay.com/photo/2015/11/16/14/43/cat-1045782__340.jpg";
 // let imageURL =
-//   "https://images.pexels.com/photos/13519033/pexels-photo-13519033.jpeg";
-let Canvas = document.getElementById("canvas");
+//   "https://cdn.pixabay.com/photo/2015/11/16/14/43/cat-1045782__340.jpg";
+let imageURL =
+  "https://images.pexels.com/photos/13519033/pexels-photo-13519033.jpeg";
+// let Canvas = document.getElementById("canvas");
 var popover = document.getElementById("popover");
 var imageObj;
 let image = document.createElement("img");
@@ -27,21 +28,19 @@ var CanvasSize = {
   height: 0,
 };
 image.src = imageURL;
-Canvas.width = image.width;
-Canvas.height = image.height;
-var canvas = new fabric.Canvas("my-canvas", {
-  // selection: false,
-  // controlsAboveOverlay: true,
-  // centeredScaling: true,
-  // allowTouchScrolling: true,
-  // preserveObjectStacking: true,
-});
-
+var canvas;
+canvas = new fabric.Canvas("canvas");
 canvas.allowTouchScrolling = true;
 canvas.perPixelTargetFind = true;
 canvas.targetFindTolerance = 4;
+// canvas = new fabric.Canvas("my-canvas", {
+//   // selection: false,
+//   // controlsAboveOverlay: true,
+//   // centeredScaling: true,
+//   // allowTouchScrolling: true,
+//   // preserveObjectStacking: true,
+// });
 
-var canvas = new fabric.Canvas("canvas");
 var strokeWidth = 3;
 var settings = {
   stroke: "black",
@@ -59,7 +58,7 @@ var settings = {
   originY: "center",
 };
 
-const setImage = () => {
+const setImage = (_canvas) => {
   fabric.Image.fromURL(imageURL, function (img) {
     imageObj = img;
     img.set({
@@ -67,8 +66,8 @@ const setImage = () => {
       // top: 170,
       // originX: "center",
       // originY: "center",
-      scaleX: Canvas.width / img.width,
-      scaleY: Canvas.height / img.height,
+      scaleX: _canvas.width / img.width,
+      scaleY: _canvas.height / img.height,
       selectable: false,
       centeredRotation: true,
     });
@@ -81,78 +80,52 @@ const setImage = () => {
 const setImageInViewPort = () => {
   const viewportWidth = window.innerWidth;
   const viewportHeight = window.innerHeight;
-  let aspectRatio = image.width / image.height;
   maxW = viewportWidth * 0.8;
   maxH = viewportHeight * 0.8;
   if (image) {
-    if (image.naturalWidth >= maxW || image.height >= maxH) {
+    let aspectRatio = image.naturalWidth / image.naturalHeight;
+    if (image.naturalWidth >= maxW || image.naturalHeight >= maxH) {
       if (maxW / maxH > aspectRatio) {
         maxW = maxH * aspectRatio;
       } else {
         maxH = maxW / aspectRatio;
       }
-      console.log("maxW,maxH :>> ", maxW, maxH);
       CanvasSize.width = maxW;
       CanvasSize.height = maxH;
-      let canvases = new Array(...document.getElementsByClassName("canvas"));
-      let canvasContainer = new Array(
-        ...document.getElementsByClassName("canvas-container")
-      )[0];
-      // console.log("canvasContainer :>> ", canvasContainer);
-      // console.log("canvases :>> ", canvases);
-
-      // canvasContainer.width = CanvasSize.width;
-      // canvasContainer.height = CanvasSize.height;
-      canvasContainer.style.width = CanvasSize.width + "px";
-      canvasContainer.style.height = CanvasSize.height + "px";
-
-      canvases.forEach((value, index, array) => {
-        value.width = CanvasSize.width;
-        value.height = CanvasSize.height;
-        value.style.width = CanvasSize.width + "px";
-        value.style.height = CanvasSize.height + "px";
-      });
-
-      // canvasContainer[0].style.width = `${maxW}px`;
-      // canvasContainer[0].style.height = `${maxH}px`;
-      // canvasContainer[1].style.width = `${maxW}px`;
-      // canvasContainer[1].style.height = `${maxH}px`;
-      // upperCanvas[1].style.width = `${maxW}px`;
-      // upperCanvas[1].style.height = `${maxH}px`;
-      // upperCanvas[1].width = maxW;
-      // upperCanvas[1].height = maxH;
-      // canvas.setWidth(maxW);
-      // canvas.setHeight(maxH);
-      // canvasContainer.style.overflow = "auto";
-      // canvas.set({
-      //   width: 600,
-      //   height: 600,
-      // });
-      // canvas.renderAll();
-      // Canvas.style.width = maxW + "px";
-      // Canvas.style.height = maxH + "px";
+      createCanvas(maxW, maxH);
+    } else {
+      CanvasSize.width = image.naturalWidth;
+      CanvasSize.height = image.naturalHeight;
+      createCanvas(image.naturalWidth, image.naturalHeight);
     }
-
-    // OrgImageSize.width = image.width;
-    // OrgImageSize.height = image.height;
   }
+};
+
+const createCanvas = (w, h) => {
+  let tempCanvas = document.createElement("canvas");
+  tempCanvas.id = "canvas";
+  tempCanvas.className = "canvas";
+  tempCanvas.width = w;
+  tempCanvas.height = h;
+  Canvas = tempCanvas;
+  document.getElementById("canvas-container").appendChild(tempCanvas);
+  setImage(tempCanvas);
 };
 
 window.onload = () => {
   if (image.src) {
-    // setImageInViewPort();
-    setImage();
+    setImageInViewPort();
     // console.log("maxW,maxH :>> ", w, h);
 
-    // let shape = {
-    //   id: getId(),
-    //   type: "rectangle",
-    //   x: 10,
-    //   y: 10,
-    //   width: 10,
-    //   height: 10,
-    // };
-    // drawRectangle(shape);
+    let shape = {
+      id: getId(),
+      type: "rectangle",
+      x: 10,
+      y: 10,
+      width: 10,
+      height: 10,
+    };
+    drawRectangle(shape);
   }
 };
 
@@ -190,6 +163,45 @@ const setType = (_type) => {
 //     console.log("post redo");
 //   });
 // };
+const deleteShape = () => {
+  const activeObject = canvas.getActiveObject();
+  console.log("activeObject :>> ", activeObject);
+  shapeDelete(activeObject);
+  canvas.remove(activeObject);
+  canvas.renderAll();
+};
+
+const shapeSave = (shape) => {
+  allShapes.push(shape);
+  console.log("shapeSave allShapes :>> ", allShapes);
+};
+
+const shapeDelete = (shape) => {
+  allShapes = allShapes.filter((item) => item.id !== shape.id);
+  console.log("shapeDelete allShapes :>> ", allShapes);
+};
+
+const shapeUpdate = (_shape) => {
+  let { x: XPercentage, y: YPercentage } = pxToPercentage(
+    _shape.left,
+    _shape.top
+  );
+  let { x: widthPercentage, y: heightPercentage } = pxToPercentage(
+    _shape.width,
+    _shape.height
+  );
+  let shape = {
+    id: _shape.id,
+    type: _shape.type,
+    x: XPercentage,
+    y: YPercentage,
+    width: widthPercentage,
+    height: heightPercentage,
+  };
+  allShapes = allShapes.map((item) => (item.id !== _shape.id ? item : shape));
+
+  console.log("shapeUpdate allShapes :>> ", allShapes);
+};
 
 // convert px To Percentage
 const pxToPercentage = (x, y) => {
@@ -320,6 +332,7 @@ const zoomReset = () => {
 };
 
 const drawRectangle = (shape) => {
+  console.log("drawRectangle called");
   let { x: left, y: top } = PercentageToPx(shape.x, shape.y);
   let { x: width, y: height } = PercentageToPx(shape.width, shape.height);
   var rect = new fabric.Rect({
@@ -372,7 +385,11 @@ const drawPoint = (shape) => {
   shapeSave(shape);
 };
 
+if (canvas) {
+  console.log("canvas :>> ", canvas);
+}
 canvas.on("mouse:down", (e) => {
+  console.log("mouse:down called");
   let { x, y } = e.absolutePointer;
   let { x: XPercentage, y: YPercentage } = pxToPercentage(x, y);
   if (eventType === "rectangle") {
@@ -530,46 +547,6 @@ const reSetStrokeWidth = () => {
 const SelectedShape = (object) => {
   console.log("SelectedShape object :>> ", object);
   // openPopOver(object);
-};
-
-const deleteShape = () => {
-  const activeObject = canvas.getActiveObject();
-  console.log("activeObject :>> ", activeObject);
-  shapeDelete(activeObject);
-  canvas.remove(activeObject);
-  canvas.renderAll();
-};
-
-const shapeSave = (shape) => {
-  allShapes.push(shape);
-  console.log("shapeSave allShapes :>> ", allShapes);
-};
-
-const shapeDelete = (shape) => {
-  allShapes = allShapes.filter((item) => item.id !== shape.id);
-  console.log("shapeDelete allShapes :>> ", allShapes);
-};
-
-const shapeUpdate = (_shape) => {
-  let { x: XPercentage, y: YPercentage } = pxToPercentage(
-    _shape.left,
-    _shape.top
-  );
-  let { x: widthPercentage, y: heightPercentage } = pxToPercentage(
-    _shape.width,
-    _shape.height
-  );
-  let shape = {
-    id: _shape.id,
-    type: _shape.type,
-    x: XPercentage,
-    y: YPercentage,
-    width: widthPercentage,
-    height: heightPercentage,
-  };
-  allShapes = allShapes.map((item) => (item.id !== _shape.id ? item : shape));
-
-  console.log("shapeUpdate allShapes :>> ", allShapes);
 };
 
 const openPopOver = (object) => {
