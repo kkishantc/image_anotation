@@ -143,15 +143,15 @@
 #container {
   /* width: 99%;
   height: 85%; */
-  position: absolute;
+  /* position: absolute; */
   /* overflow: auto; */
-  margin: 0px 5px;
-  padding-bottom: 10px;
+  /* margin: 0px 5px; */
+  /* padding-bottom: 10px; */
 }
 .main-container {
-  display: flex;
+  /* display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: center; */
 }
 
 #main-body {
@@ -175,4 +175,12 @@
 
 .annotation-link {
   text-decoration: none;
+}
+
+img {
+  /* position: absolute;
+  left: 0;
+  top: 0; */
+  /* transition: all 0.25s ease-in-out; */
+  /* transform-origin: "center center"; */
 }

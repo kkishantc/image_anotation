@@ -5,10 +5,12 @@ var rotationAngle = 0;
 var selectedId = null;
 var clickedId = null;
 var mainBody = document.getElementById("main-body");
-var container = document.getElementById("container");
 var image = document.getElementById("image");
+// image.src = "https://picsum.photos/1280/720/";
 // image.src = "./pexels-pedro-slinger-13519033.jpg";
-image.src = "./cat.jpg";
+// image.src = "./cat.jpg";
+image.src =
+  "https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg";
 var maxW, maxH;
 
 var OrgImageSize = {
@@ -73,13 +75,14 @@ function rotateImage(mainBody) {
 function eraseZone(e) {
   const arrZones = getZones();
   let { x, y } = getMousePos(image, e);
-  let shape = arrZones.filter((value) => isMouseInShape(e, x, y, value));
+  let shape = arrZones.filter((value) => isMouseInShape(e, x, y, value))[0];
+  console.log("shape :>> ", shape);
   if (selectedId) {
     closePopOver(selectedId);
   }
-  deleteZone(shape[0]);
+  deleteZone(shape);
   eventType = "";
-  mainBody.removeEventListener("click", eraseZone);
+  // mainBody.removeEventListener("click", eraseZone);
 }
 
 function clearZone() {
@@ -136,62 +139,149 @@ function reDraw() {
     let { x: width, y: height } = PercentageToPx(objZone.width, objZone.height);
     objZone.x = x;
     objZone.y = y;
-    if (objZone.type !== "point") {
-      objZone.width = width;
-      objZone.height = height;
-    }
+    objZone.width = width;
+    objZone.height = height;
     addZone(objZone);
     addZoneBox(objZone);
   });
   allShapes = [...allShapes];
 }
 
+function zoomImageOnWheel(event) {
+  // const minScale = 1;
+  // const maxScale = 5;
+  // const zoomStep = 0.1;
+
+  // let currentScale = 1;
+
+  event.preventDefault();
+  // Change the zoom level based on the mouse wheel delta
+  // const delta = Math.sign(e.deltaY);
+  // // currentScale += delta * zoomStep;
+  // // currentScale = Math.max(minScale, Math.min(currentScale, maxScale));
+
+  // // Set the width and height of the image to zoom in or out
+  // const newWidth = image.width * delta + zoomStep;
+  // const newHeight = image.height * delta + zoomStep;
+  // console.log("newWidth,newHeight :>> ", newWidth, newHeight);
+
+  // // Calculate the mouse position relative to the container
+  // const containerRect = mainBody.getBoundingClientRect();
+  // const mouseX = e.clientX - containerRect.left;
+  // const mouseY = e.clientY - containerRect.top;
+
+  // console.log("mouseX,mouseY :>> ", mouseX, mouseY);
+
+  // Calculate the new position of the image within the container to keep the mouse position fixed
+  // const imageX =
+  //   (mouseX - image.offsetLeft) * (1 - newWidth / mainBody.offsetWidth);
+  // const imageY =
+  //   (mouseY - image.offsetTop) * (1 - newHeight / mainBody.offsetHeight);
+
+  // console.log("imageX,imageY :>> ", imageX, imageY);
+
+  // const centerX = (e.offsetX / mainBody.offsetWidth) * 100;
+  // const centerY = (e.offsetY / mainBody.offsetHeight) * 100;
+  // image.style.transformOrigin = `${centerX}% ${centerY}%`;
+
+  // image.width = `${newWidth}`;
+  // image.height = `${newHeight}`;
+  // image.style.top = `${imageY}px`;
+  // image.style.left = `${imageX}px`;
+
+  // event.preventDefault();
+  // const zoomFactor = 1.2;
+  // const direction = Math.sign(event.deltaY);
+  // const currentWidth = image.offsetWidth;
+  // const currentHeight = image.offsetHeight;
+  // const newWidth = currentWidth * zoomFactor ** direction;
+  // const newHeight = currentHeight * zoomFactor ** direction;
+
+  // const cursorX = event.clientX - image.offsetLeft;
+  // const cursorY = event.clientY - image.offsetTop;
+
+  // const leftOffset = ((currentWidth - newWidth) * cursorX) / currentWidth;
+  // const topOffset = ((currentHeight - newHeight) * cursorY) / currentHeight;
+
+  // image.style.width = newWidth + "px";
+  // image.style.height = newHeight + "px";
+  // image.style.left = parseFloat(image.style.left) + leftOffset + "px";
+  // image.style.top = parseFloat(image.style.top) + topOffset + "px";
+
+  // const transformOriginX = (cursorX / currentWidth) * 100 + "%";
+  // const transformOriginY = (cursorY / currentHeight) * 100 + "%";
+  // image.style.transformOrigin = `${transformOriginX} ${transformOriginY}`;
+  console.log("event.wheelDelta :>> ", event.wheelDelta);
+  const delta = Math.sign(event.wheelDelta);
+  const width = image.width;
+  const height = image.height;
+  console.log("delta :>> ", delta);
+  console.log("width,height :>> ", width, height);
+  // let { x: mouseX, y: mouseY } = getMousePos(image, event);
+  const mouseX = event.offsetX;
+  const mouseY = event.offsetY;
+  console.log("mouseX,mouseY :>> ", mouseX, mouseY);
+  const newWidth = width + delta + 100;
+  const newHeight = height + delta + 100;
+  console.log("newWidth,newHeight :>> ", newWidth, newHeight);
+  const ratioX = mouseX / width;
+  const ratioY = mouseY / height;
+  console.log("ratioX,ratioY :>> ", ratioX, ratioY);
+  const newMouseX = ratioX * newWidth;
+  const newMouseY = ratioY * newHeight;
+  console.log("newMouseX,newMouseY :>> ", newMouseX, newMouseY);
+  const offsetX = mouseX - newMouseX;
+  const offsetY = mouseY - newMouseY;
+  console.log("offsetX,offsetY :>> ", offsetX, offsetY);
+
+  // mainBody.style.transform = `translate(${image.offsetLeft + offsetX}px ${
+  //   image.offsetTop + offsetY
+  // }px)`;
+
+  image.width = newWidth;
+  image.height = newHeight;
+  mainBody.width = newWidth;
+  mainBody.height = newHeight;
+  mainBody.style.left = `${mouseX}px`;
+  mainBody.style.top = `${mouseY}px`;
+
+  image.click();
+  if (selectedId) {
+    closePopOver(selectedId);
+  }
+  reDraw();
+}
 // Get ratio (that is: 2 means original has twice the size; 1/2 means original has half the size)
 function getImageRatio(_imgElement) {
   return _imgElement.naturalWidth / _imgElement.width;
 }
 
 function setImageInViewPort() {
-  // var tempImageWidth = 0;
-  // var tempImageHeight = 0;
-
-  // const imageNWidth = image.naturalWidth;
-  // const imageNHeight = image.naturalHeight;
-
-  // tempImageWidth = imageNWidth;
-  // tempImageHeight = imageNHeight;
-
   const viewportWidth = window.innerWidth;
   const viewportHeight = window.innerHeight;
 
-  // var tempViewportWidth = viewportWidth;
-  // var tempViewportHeight = viewportHeight;
-
-  // calculate aspect ratio
-  let aspectRatio = image.width / image.height;
-
-  // calculate maximum width and height based on viewport and aspect ratio
-
-  // maxW = viewportWidth;
-  // maxW = viewportWidth;
-  maxW = viewportWidth * 0.8;
-  maxH = viewportHeight * 0.8;
+  var maxWidth = viewportWidth * 0.8;
+  var maxHeight = viewportHeight * 0.8;
 
   if (image) {
-    if (image.naturalWidth >= maxW || image.height >= maxH) {
-      if (maxW / maxH > aspectRatio) {
-        maxW = maxH * aspectRatio;
-      } else {
-        maxH = maxW / aspectRatio;
-      }
-      image.width = maxW;
-      image.height = maxH;
-      console.log("image.width,image.height :>> ", image.width, image.height);
-    }
+    const origWidth = image.width;
+    const origHeight = image.height;
 
+    const aspectRatio = origWidth / origHeight;
+
+    let newWidth = maxWidth;
+    let newHeight = maxHeight;
+    if (newWidth / aspectRatio > maxHeight) {
+      newWidth = maxHeight * aspectRatio;
+      newHeight = maxHeight;
+    } else {
+      newHeight = newWidth / aspectRatio;
+    }
+    image.width = newWidth;
+    image.height = newHeight;
     OrgImageSize.width = image.width;
     OrgImageSize.height = image.height;
-    console.log("image.width,image.height :>> ", image.width, image.height);
+    console.log("newWidth, newHeight :>> ", newWidth, newHeight);
   }
 
   // var maxWidth = tempViewportWidth;
@@ -261,6 +351,7 @@ window.onload = () => {
 };
 
 mainBody.addEventListener("click", newZone);
+// mainBody.addEventListener("wheel", zoomImageOnWheel);
 
 // User has clicked on the image so create a new zone
 function newZone(_event) {
@@ -280,6 +371,8 @@ function newZone(_event) {
   } else if (eventType === "point") {
     let { x, y } = getMousePos(image, _event);
     const objZone = {
+      width: 10,
+      height: 10,
       x,
       y,
       slug: getNextZoneSequence(),
@@ -306,36 +399,20 @@ function newZone(_event) {
 }
 
 function isMouseInShape(event, mx, my, shape) {
-  // if (shape.radius) {
-  //     // this is a oval
-  //     var dx = mx - shape.x;
-  //     var dy = my - shape.y;
-  //     // math test to see if mouse is inside oval
-  //     if (dx * dx + dy * dy < shape.radius * shape.radius) {
-  //         // yes, mouse is inside this oval
-  //         return (true);
-  //     }
-  // } else if (shape.width) {
-  // this is a rectangle
-
   let { x, y } = PercentageToPx(shape.x, shape.y);
   let { x: width, y: height } = PercentageToPx(shape.width, shape.height);
   var rLeft = x;
   var rRight = x + width;
   var rTop = y;
   var rBott = y + height;
-  // math test to see if mouse is inside rectangle
   if (mx > rLeft && mx < rRight && my > rTop && my < rBott) {
     return true;
   }
-  // }
-  // the mouse isn't in any of the shapes
   return false;
 }
 
 // Draw the box on the screen for given zone
 function addZoneBox(_objZone, _event) {
-  console.log("_objZone :>> ", _objZone);
   const theDiv = document.createElement("div");
   theDiv.className =
     _objZone.type === "oval" || _objZone.type === "point"
@@ -354,10 +431,8 @@ function addZoneBox(_objZone, _event) {
 
   theDiv.style.top = `${y}px`;
   theDiv.style.left = `${x}px`;
-  if (_objZone.type !== "point") {
-    theDiv.style.width = `${width}px`;
-    theDiv.style.height = `${height}px`;
-  }
+  theDiv.style.width = `${width}px`;
+  theDiv.style.height = `${height}px`;
 
   makeDraggable(theDiv, _objZone);
   if (_objZone.type != "point") {
@@ -626,9 +701,35 @@ function initZones() {
     type: "rectangle",
     x: 0,
     y: 0,
-    width: 10,
-    height: 10,
+    width: 50,
+    height: 50,
   });
+  tempAllShape.push({
+    height: 8.957654723127035,
+    slug: "94415",
+    type: "rectangle",
+    width: 11.491442542787286,
+    x: 43.76528117359413,
+    y: 79.96742671009773,
+  });
+
+  // tempAllShape.push({
+  //   slug: "94415",
+  //   type: "point",
+  //   x: 50,
+  //   y: 50,
+  //   width: 10,
+  //   height: 10,
+  // });
+
+  // tempAllShape.push({
+  //   slug: "94416",
+  //   type: "oval",
+  //   x: 50,
+  //   y: 30,
+  //   width: 30,
+  //   height: 15,
+  // });
 
   if (tempAllShape.length > 0) {
     tempAllShape?.forEach((objZone) => {
@@ -639,10 +740,8 @@ function initZones() {
       );
       objZone.x = x;
       objZone.y = y;
-      if (objZone.type !== "point") {
-        objZone.width = width;
-        objZone.height = height;
-      }
+      objZone.width = width;
+      objZone.height = height;
       if (zoneOutsideImage(objZone)) {
         deleteZone(objZone);
       } else {
@@ -705,10 +804,8 @@ function getPixels(_x) {
 // Replace zone with zone passed as parameter
 function updateZone(_objZone) {
   console.log("updateZone");
-  console.log("_objZone :>> ", _objZone);
   if (eventType !== "erase" || (eventType !== "clear" && eventType === "")) {
     const arrZones = new Array();
-    console.log("_objZone :>> ", _objZone);
     getZones().forEach((objZone) => {
       if (objZone.slug === _objZone?.slug) {
         let { x, y } = pxToPercentage(_objZone.x, _objZone.y);
@@ -752,13 +849,16 @@ function deleteZone(_objZone) {
 function addZone(_objZone) {
   const arrZones = getZones();
   let { x, y } = pxToPercentage(_objZone.x, _objZone.y);
-  let { x: width, y: height } = pxToPercentage(_objZone.width, _objZone.height);
+  let { x: width, y: height } = pxToPercentage(
+    _objZone.type !== "point" ? _objZone.width : 10,
+    _objZone.type !== "point" ? _objZone.height : 10
+  );
   _objZone.x = x;
   _objZone.y = y;
-  if (_objZone.type !== "point") {
-    _objZone.width = width;
-    _objZone.height = height;
-  }
+  // if (_objZone.type !== "point") {
+  _objZone.width = width;
+  _objZone.height = height;
+  // }
   arrZones.push(_objZone);
   allShapes = arrZones;
   // localStorage.setItem("allShapes", JSON.stringify(allShapes));
