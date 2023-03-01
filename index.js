@@ -4,6 +4,7 @@ var allDetails = [];
 var rotationAngle = 0;
 var selectedId = null;
 var clickedId = null;
+var scale = 1;
 var mainBody = document.getElementById("main-body");
 var image = document.getElementById("image");
 // image.src = "https://picsum.photos/1280/720/";
@@ -12,6 +13,13 @@ var image = document.getElementById("image");
 image.src =
   "https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg";
 var maxW, maxH;
+var mouseX = 0;
+var mouseY = 0,
+  panning = false,
+  pointX = 0,
+  pointY = 0,
+  start = { x: 0, y: 0 },
+  zoom = document.getElementById("main-body");
 
 var OrgImageSize = {
   width: 0,
@@ -22,8 +30,11 @@ function getMousePos(canvas, evt) {
   var rect = canvas.getBoundingClientRect();
   let x = evt.clientX - rect.left;
   let y = evt.clientY - rect.top;
-
+  if (scale > 1 || scale < 1) {
+    return { x: evt.offsetX, y: evt.offsetY };
+  }
   return { x, y };
+  // return { x: evt.offsetX, y: evt.offsetY };
 }
 
 function setType(_type) {
@@ -52,7 +63,7 @@ function setType(_type) {
 function rotateImage(mainBody) {
   let container = mainBody;
   // container.style.transformOrigin = "50% 73%";
-  container.style.transformOrigin = "center";
+  container.style.transformOrigin = "center center";
   container.style.transform = `rotate(${rotationAngle}deg)`;
 
   if (rotationAngle >= 360) {
@@ -62,8 +73,8 @@ function rotateImage(mainBody) {
     closePopOver(selectedId);
   }
 
-  let btns = document.getElementById("shapes-btn");
-  [...btns?.children].forEach((value, index, array) => {
+  let buttons = document.getElementById("shapes-btn");
+  [...buttons?.children].forEach((value) => {
     if (rotationAngle != 0) {
       value.disabled = true;
     } else {
@@ -82,7 +93,7 @@ function eraseZone(e) {
   }
   deleteZone(shape);
   eventType = "";
-  // mainBody.removeEventListener("click", eraseZone);
+  mainBody.removeEventListener("click", eraseZone);
 }
 
 function clearZone() {
@@ -97,32 +108,43 @@ function clearZone() {
 }
 
 function zoomIn() {
-  image.click();
-  if (selectedId) {
-    closePopOver(selectedId);
-  }
-  image.width += image.clientWidth * 0.1;
-  image.height += image.clientHeight * 0.1;
-  reDraw();
+  // image.click();
+  // if (selectedId) {
+  //   closePopOver(selectedId);
+  // }
+  // image.width += image.width * 0.1;
+  // image.height += image.height * 0.1;
+  // reDraw();
+  scale *= 1.2;
+  zoom.style.transformOrigin = "0px 0px";
+  zoom.style.transform = `scale(${scale})`;
 }
 
 function zoomOut() {
-  if (image.width >= 150 || image.height >= 150) {
-    image.click();
-    if (selectedId) {
-      closePopOver(selectedId);
-    }
-    image.width -= image.clientWidth * 0.1;
-    image.height -= image.clientHeight * 0.1;
-    reDraw();
-  }
+  // if (image.width >= 150 || image.height >= 150) {
+  //   image.click();
+  //   if (selectedId) {
+  //     closePopOver(selectedId);
+  //   }
+  //   image.width -= image.clientWidth * 0.1;
+  //   image.height -= image.clientHeight * 0.1;
+  //   reDraw();
+  // }
+
+  scale /= 1.2;
+  zoom.style.transformOrigin = "0px 0px";
+  zoom.style.transform = `scale(${scale})`;
 }
 
 function zoomReset() {
-  image.click();
-  image.width = OrgImageSize.width;
-  image.height = OrgImageSize.height;
-  reDraw();
+  // image.click();
+  // image.width = OrgImageSize.width;
+  // image.height = OrgImageSize.height;
+  // reDraw();
+
+  scale = 1;
+  zoom.style.transformOrigin = "0px 0px";
+  zoom.style.transform = `scale(${scale})`;
 }
 
 function reDraw() {
@@ -147,110 +169,223 @@ function reDraw() {
   allShapes = [...allShapes];
 }
 
-function zoomImageOnWheel(event) {
-  // const minScale = 1;
-  // const maxScale = 5;
-  // const zoomStep = 0.1;
+// var scale = 1;
+//   pointX = 0,
+//   pointY = 0,
+//   start = { x: 0, y: 0 },
 
-  // let currentScale = 1;
+// let zoom = document.getElementById("main-body");
 
-  event.preventDefault();
-  // Change the zoom level based on the mouse wheel delta
-  // const delta = Math.sign(e.deltaY);
-  // // currentScale += delta * zoomStep;
-  // // currentScale = Math.max(minScale, Math.min(currentScale, maxScale));
+// function setTransform(pointX, pointY, scale) {
+//   zoom.style.transform = `translate(${pointX}px, ${pointY}px) scale(${scale})`;
+// }
 
-  // // Set the width and height of the image to zoom in or out
-  // const newWidth = image.width * delta + zoomStep;
-  // const newHeight = image.height * delta + zoomStep;
-  // console.log("newWidth,newHeight :>> ", newWidth, newHeight);
-
-  // // Calculate the mouse position relative to the container
-  // const containerRect = mainBody.getBoundingClientRect();
-  // const mouseX = e.clientX - containerRect.left;
-  // const mouseY = e.clientY - containerRect.top;
-
-  // console.log("mouseX,mouseY :>> ", mouseX, mouseY);
-
-  // Calculate the new position of the image within the container to keep the mouse position fixed
-  // const imageX =
-  //   (mouseX - image.offsetLeft) * (1 - newWidth / mainBody.offsetWidth);
-  // const imageY =
-  //   (mouseY - image.offsetTop) * (1 - newHeight / mainBody.offsetHeight);
-
-  // console.log("imageX,imageY :>> ", imageX, imageY);
-
-  // const centerX = (e.offsetX / mainBody.offsetWidth) * 100;
-  // const centerY = (e.offsetY / mainBody.offsetHeight) * 100;
-  // image.style.transformOrigin = `${centerX}% ${centerY}%`;
-
-  // image.width = `${newWidth}`;
-  // image.height = `${newHeight}`;
-  // image.style.top = `${imageY}px`;
-  // image.style.left = `${imageX}px`;
-
-  // event.preventDefault();
-  // const zoomFactor = 1.2;
-  // const direction = Math.sign(event.deltaY);
-  // const currentWidth = image.offsetWidth;
-  // const currentHeight = image.offsetHeight;
-  // const newWidth = currentWidth * zoomFactor ** direction;
-  // const newHeight = currentHeight * zoomFactor ** direction;
-
-  // const cursorX = event.clientX - image.offsetLeft;
-  // const cursorY = event.clientY - image.offsetTop;
-
-  // const leftOffset = ((currentWidth - newWidth) * cursorX) / currentWidth;
-  // const topOffset = ((currentHeight - newHeight) * cursorY) / currentHeight;
-
-  // image.style.width = newWidth + "px";
-  // image.style.height = newHeight + "px";
-  // image.style.left = parseFloat(image.style.left) + leftOffset + "px";
-  // image.style.top = parseFloat(image.style.top) + topOffset + "px";
-
-  // const transformOriginX = (cursorX / currentWidth) * 100 + "%";
-  // const transformOriginY = (cursorY / currentHeight) * 100 + "%";
-  // image.style.transformOrigin = `${transformOriginX} ${transformOriginY}`;
-  console.log("event.wheelDelta :>> ", event.wheelDelta);
-  const delta = Math.sign(event.wheelDelta);
-  const width = image.width;
-  const height = image.height;
-  console.log("delta :>> ", delta);
-  console.log("width,height :>> ", width, height);
-  // let { x: mouseX, y: mouseY } = getMousePos(image, event);
-  const mouseX = event.offsetX;
-  const mouseY = event.offsetY;
-  console.log("mouseX,mouseY :>> ", mouseX, mouseY);
-  const newWidth = width + delta + 100;
-  const newHeight = height + delta + 100;
-  console.log("newWidth,newHeight :>> ", newWidth, newHeight);
-  const ratioX = mouseX / width;
-  const ratioY = mouseY / height;
-  console.log("ratioX,ratioY :>> ", ratioX, ratioY);
-  const newMouseX = ratioX * newWidth;
-  const newMouseY = ratioY * newHeight;
-  console.log("newMouseX,newMouseY :>> ", newMouseX, newMouseY);
-  const offsetX = mouseX - newMouseX;
-  const offsetY = mouseY - newMouseY;
-  console.log("offsetX,offsetY :>> ", offsetX, offsetY);
-
-  // mainBody.style.transform = `translate(${image.offsetLeft + offsetX}px ${
-  //   image.offsetTop + offsetY
-  // }px)`;
-
-  image.width = newWidth;
-  image.height = newHeight;
-  mainBody.width = newWidth;
-  mainBody.height = newHeight;
-  mainBody.style.left = `${mouseX}px`;
-  mainBody.style.top = `${mouseY}px`;
-
-  image.click();
-  if (selectedId) {
-    closePopOver(selectedId);
-  }
-  reDraw();
+function setTransform() {
+  zoom.style.transform =
+    "translate(" + pointX + "px, " + pointY + "px) scale(" + scale + ")";
 }
+
+zoom.onmousedown = function (e) {
+  if (e.altKey) {
+    e.preventDefault();
+    start = { x: e.clientX - pointX, y: e.clientY - pointY };
+    panning = true;
+  }
+};
+
+zoom.onmouseup = function (e) {
+  if (e.altKey) {
+    panning = false;
+  }
+};
+
+zoom.onmousemove = function (e) {
+  if (e.altKey) {
+    e.preventDefault();
+    if (!panning) {
+      return;
+    }
+    pointX = e.clientX - start.x;
+    pointY = e.clientY - start.y;
+    setTransform();
+  }
+};
+
+zoom.onwheel = function (e) {
+  if (e.shiftKey) {
+    e.preventDefault();
+    var xs = (e.offsetX - pointX) / scale,
+      ys = (e.offsetY - pointY) / scale,
+      delta = e.wheelDelta ? e.wheelDelta : -e.deltaY;
+    delta > 0 ? (scale *= 1.2) : (scale /= 1.2);
+    pointX = e.offsetX - xs * scale;
+    pointY = e.offsetY - ys * scale;
+
+    setTransform();
+  }
+};
+
+// function zoomImageOnWheel(event) {
+//   event.preventDefault();
+
+//   // mouseX = event.offsetX;
+//   // mouseY = event.offsetY;
+
+//   // var delta = Math.max(-1, Math.min(1, event.wheelDelta || -event.detail));
+
+//   // if (delta < 0) {
+//   //   scale -= 0.1;
+//   // } else {
+//   //   scale += 0.1;
+//   // }
+
+//   // var transformOriginX = (mouseX / zoom.offsetWidth) * 100;
+//   // var transformOriginY = (mouseY / zoom.offsetHeight) * 100;
+
+//   // image.click();
+//   // if (selectedId) {
+//   //   closePopOver(selectedId);
+//   // }
+//   // reDraw();
+
+//   // event.preventDefault();
+//   // const delta = Math.sign(event.deltaY);
+//   // const mouseX = event.offsetX;
+//   // const mouseY = event.offsetY;
+//   // console.log("mouseX,mouseY :>> ", mouseX, mouseY);
+//   // // var xs = (e.offsetX - pointX) / scale,
+//   // //   ys = (e.offsetY - pointY) / scale,
+//   // //   delta = e.wheelDelta ? e.wheelDelta : -e.deltaY;
+//   // delta > 0 ? (scale *= 1.2) : (scale /= 1.2);
+//   // // pointX = e.offsetX - xs * scale;
+//   // // pointY = e.offsetY - ys * scale;
+//   // setTransform(mouseX, mouseY, scale);
+//   // var newWidth, newHeight;
+//   // const delta = Math.sign(event.deltaY);
+//   // const mouseX = event.offsetX;
+//   // const mouseY = event.offsetY;
+//   // console.log("mouseX,mouseY :>> ", mouseX, mouseY);
+//   // const imageRect = image.getBoundingClientRect();
+//   // if (delta === 1) {
+//   // console.log("image.width,image.height :>> ", image.width, image.height);
+//   // newWidth = image.width + image.clientWidth * 0.1;
+//   // newHeight = image.height + image.clientHeight * 0.1;
+//   // image.width = newWidth;
+//   // image.height = newHeight;
+//   // const deltaWidth = newWidth - image.width;
+//   // const deltaHeight = newHeight - image.height;
+//   // console.log("newWidth,newHeight :>> ", newWidth, newHeight);
+//   // console.log("deltaWidth,deltaHeight :>> ", deltaWidth, deltaHeight);
+//   // image.style.position = "absolute";
+//   // image.style.left = image.height - mouseY + "px";
+//   // image.style.top = image.width - mouseX + "px";
+//   // image.style.left =
+//   //   image.offsetLeft - deltaWidth * (mouseX / imageRect.width) + "px";
+//   // image.style.top =
+//   //   image.offsetTop - deltaHeight * (mouseY / imageRect.height) + "px";
+//   // } else {
+//   // image.width -= image.clientWidth * 0.1;
+//   // image.height -= image.clientHeight * 0.1;
+//   // }
+// }
+
+// Change the zoom level based on the mouse wheel delta
+// const delta = Math.sign(e.deltaY);
+// // currentScale += delta * zoomStep;
+// // currentScale = Math.max(minScale, Math.min(currentScale, maxScale));
+
+// // Set the width and height of the image to zoom in or out
+// const newWidth = image.width * delta + zoomStep;
+// const newHeight = image.height * delta + zoomStep;
+// console.log("newWidth,newHeight :>> ", newWidth, newHeight);
+
+// // Calculate the mouse position relative to the container
+// const containerRect = mainBody.getBoundingClientRect();
+// const mouseX = e.clientX - containerRect.left;
+// const mouseY = e.clientY - containerRect.top;
+
+// console.log("mouseX,mouseY :>> ", mouseX, mouseY);
+
+// Calculate the new position of the image within the container to keep the mouse position fixed
+// const imageX =
+//   (mouseX - image.offsetLeft) * (1 - newWidth / mainBody.offsetWidth);
+// const imageY =
+//   (mouseY - image.offsetTop) * (1 - newHeight / mainBody.offsetHeight);
+
+// console.log("imageX,imageY :>> ", imageX, imageY);
+
+// const centerX = (e.offsetX / mainBody.offsetWidth) * 100;
+// const centerY = (e.offsetY / mainBody.offsetHeight) * 100;
+// image.style.transformOrigin = `${centerX}% ${centerY}%`;
+
+// image.width = `${newWidth}`;
+// image.height = `${newHeight}`;
+// image.style.top = `${imageY}px`;
+// image.style.left = `${imageX}px`;
+
+// event.preventDefault();
+// const zoomFactor = 1.2;
+// const direction = Math.sign(event.deltaY);
+// const currentWidth = image.offsetWidth;
+// const currentHeight = image.offsetHeight;
+// const newWidth = currentWidth * zoomFactor ** direction;
+// const newHeight = currentHeight * zoomFactor ** direction;
+
+// const cursorX = event.clientX - image.offsetLeft;
+// const cursorY = event.clientY - image.offsetTop;
+
+// const leftOffset = ((currentWidth - newWidth) * cursorX) / currentWidth;
+// const topOffset = ((currentHeight - newHeight) * cursorY) / currentHeight;
+
+// image.style.width = newWidth + "px";
+// image.style.height = newHeight + "px";
+// image.style.left = parseFloat(image.style.left) + leftOffset + "px";
+// image.style.top = parseFloat(image.style.top) + topOffset + "px";
+
+// const transformOriginX = (cursorX / currentWidth) * 100 + "%";
+// const transformOriginY = (cursorY / currentHeight) * 100 + "%";
+// image.style.transformOrigin = `${transformOriginX} ${transformOriginY}`;
+// console.log("event.wheelDelta :>> ", event.wheelDelta);
+// const delta = Math.sign(event.wheelDelta);
+// const width = image.width;
+// const height = image.height;
+// console.log("delta :>> ", delta);
+// console.log("width,height :>> ", width, height);
+// // let { x: mouseX, y: mouseY } = getMousePos(image, event);
+// const mouseX = event.offsetX;
+// const mouseY = event.offsetY;
+// console.log("mouseX,mouseY :>> ", mouseX, mouseY);
+// const newWidth = width + delta + 100;
+// const newHeight = height + delta + 100;
+// console.log("newWidth,newHeight :>> ", newWidth, newHeight);
+// const ratioX = mouseX / width;
+// const ratioY = mouseY / height;
+// console.log("ratioX,ratioY :>> ", ratioX, ratioY);
+// const newMouseX = ratioX * newWidth;
+// const newMouseY = ratioY * newHeight;
+// console.log("newMouseX,newMouseY :>> ", newMouseX, newMouseY);
+// const offsetX = mouseX - newMouseX;
+// const offsetY = mouseY - newMouseY;
+// console.log("offsetX,offsetY :>> ", offsetX, offsetY);
+
+// mainBody.style.transform = `translate(${image.offsetLeft + offsetX}px ${
+//   image.offsetTop + offsetY
+// }px)`;
+
+// image.width = newWidth;
+// image.height = newHeight;
+// mainBody.width = newWidth;
+// mainBody.height = newHeight;
+// mainBody.style.left = `${mouseX}px`;
+// mainBody.style.top = `${mouseY}px`;
+
+// image.click();
+// if (selectedId) {
+//   closePopOver(selectedId);
+// }
+// reDraw();
+// }
+
 // Get ratio (that is: 2 means original has twice the size; 1/2 means original has half the size)
 function getImageRatio(_imgElement) {
   return _imgElement.naturalWidth / _imgElement.width;
@@ -454,6 +589,7 @@ function makeDraggable(_element, _objZone) {
   function handelMouseDown(e) {
     isDown = true;
     let { x, y } = getMousePos(mainBody, e);
+    console.log("x, y :>> ", x, y);
     pos3 = x;
     pos4 = y;
     _element.addEventListener("mouseup", handelMouseUp);
@@ -696,22 +832,23 @@ function makeResizable(_element, _objZone) {
 
 function initZones() {
   let tempAllShape = [];
-  tempAllShape.push({
-    slug: "94414",
-    type: "rectangle",
-    x: 0,
-    y: 0,
-    width: 50,
-    height: 50,
-  });
-  tempAllShape.push({
-    height: 8.957654723127035,
-    slug: "94415",
-    type: "rectangle",
-    width: 11.491442542787286,
-    x: 43.76528117359413,
-    y: 79.96742671009773,
-  });
+  // tempAllShape.push({
+  //   slug: "94414",
+  //   type: "rectangle",
+  //   x: 0,
+  //   y: 0,
+  //   width: 50,
+  //   height: 50,
+  // });
+
+  // tempAllShape.push({
+  //   height: 8.957654723127035,
+  //   slug: "94415",
+  //   type: "rectangle",
+  //   width: 11.491442542787286,
+  //   x: 43.76528117359413,
+  //   y: 79.96742671009773,
+  // });
 
   // tempAllShape.push({
   //   slug: "94415",
@@ -943,15 +1080,22 @@ function getElementPosition(_element) {
 
 // convert px To Percentage
 function pxToPercentage(_startX, _startY) {
-  let xPercent = parseFloat((_startX / image.width) * 100);
-  let yPercent = parseFloat((_startY / image.height) * 100);
+  // console.log("scale :>> ", scale);
+  let tempWidth = image.width * scale;
+  let tempHeight = image.height * scale;
+  // console.log("tempWidth,tempHeight :>> ", tempWidth, tempHeight);
+  let xPercent = parseFloat((_startX / tempWidth) * 100);
+  let yPercent = parseFloat((_startY / tempHeight) * 100);
   return { x: xPercent, y: yPercent };
 }
 
 // // convert Percentage To Px
 function PercentageToPx(_startX, _startY) {
-  let orgX = parseFloat((_startX / 100) * image.width);
-  let orgY = parseFloat((_startY / 100) * image.height);
+  let tempWidth = image.width * scale;
+  let tempHeight = image.height * scale;
+  // console.log("tempWidth,tempHeight :>> ", tempWidth, tempHeight);
+  let orgX = parseFloat((_startX / 100) * tempWidth);
+  let orgY = parseFloat((_startY / 100) * tempHeight);
   return { x: orgX, y: orgY };
 }
 
