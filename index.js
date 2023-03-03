@@ -1,12 +1,15 @@
 var eventType = "";
 var allShapes = [];
+var allHistory = [];
 var allDetails = [];
 var rotationAngle = 0;
 var selectedId = null;
 var clickedId = null;
 var scale = 1;
+let mainContainer = document.getElementsByClassName("main-container")[0];
 var mainBody = document.getElementById("main-body");
-var image = document.getElementById("image");
+// var image = document.getElementById("image");
+var image = new Image();
 // image.src = "https://picsum.photos/1280/720/";
 // image.src = "./pexels-pedro-slinger-13519033.jpg";
 // image.src = "./cat.jpg";
@@ -40,53 +43,62 @@ function setType(_type) {
   eventType = _type;
   if (eventType === "clear") {
     clearZone();
-  }
-  if (eventType === "delete") {
+  } else if (eventType === "delete") {
     mainBody.addEventListener("click", eraseZone);
-  }
-  if (eventType === "rotate") {
+  } else if (eventType === "rotate") {
     rotationAngle += 90;
     rotateImage(mainBody, rotationAngle);
-  }
-  if (eventType === "zoomIn") {
+  } else if (eventType === "zoomIn") {
     zoomIn();
-  }
-  if (eventType === "zoomOut") {
+  } else if (eventType === "zoomOut") {
     zoomOut();
-  }
-  if (eventType === "zoomReset") {
+  } else if (eventType === "zoomReset") {
     zoomReset();
+  } else if (eventType === "undo") {
+    undo();
+  } else if (eventType === "redo") {
+    redo();
   }
 }
 
+function undo() {
+  console.log("allHistory :>> ", allHistory);
+}
+function redo() {
+  console.log("allHistory :>> ", allHistory);
+}
+
 function rotateImage(mainBody) {
+  if (rotationAngle >= 360) {
+    rotationAngle = 0;
+  }
+
   let container = mainBody;
   // container.style.transformOrigin = "50% 73%";
   container.style.transformOrigin = "center center";
   container.style.transform = `rotate(${rotationAngle}deg)`;
 
-  if (rotationAngle >= 360) {
-    rotationAngle = 0;
-  }
   if (selectedId != null && allShapes.length > 0) {
     closePopOver(selectedId);
   }
 
   let buttons = document.getElementById("shapes-btn");
+
   [...buttons?.children].forEach((value) => {
     if (rotationAngle != 0) {
       value.disabled = true;
+      // mainContainer.style.display = "flex";
     } else {
       value.disabled = false;
+      // mainContainer.style.display = "block";
     }
   });
 }
 
 function eraseZone(e) {
   const arrZones = getZones();
-  let { x, y } = getMousePos(image, e);
+  let { x, y } = getMousePos(mainBody, e);
   let shape = arrZones.filter((value) => isMouseInShape(e, x, y, value))[0];
-  console.log("shape :>> ", shape);
   if (selectedId) {
     closePopOver(selectedId);
   }
@@ -107,12 +119,21 @@ function clearZone() {
 }
 
 function zoomIn() {
-  image.click();
   if (selectedId) {
     closePopOver(selectedId);
   }
-  image.width += image.width * 0.1;
-  image.height += image.height * 0.1;
+
+  scale = 1 + 1 * 0.1;
+
+  const newWidth = getPixels(mainBody.style.width) * scale;
+  const newHeight = getPixels(mainBody.style.height) * scale;
+
+  mainBody.style.width = `${newWidth}px`;
+  mainBody.style.height = `${newHeight}px`;
+
+  // mainBody.style.width = `${getPixels(mainBody.style.width) + 100}px`;
+  // mainBody.style.height = `${getPixels(mainBody.style.height) + 100}px`;
+  // mainBody.click();
   reDraw();
   // scale *= 1.2;
   // zoom.style.transformOrigin = "0px 0px";
@@ -120,13 +141,24 @@ function zoomIn() {
 }
 
 function zoomOut() {
-  if (image.width >= 150 || image.height >= 150) {
-    image.click();
+  if (
+    getPixels(mainBody.style.width) >= 150 ||
+    getPixels(mainBody.style.height) >= 150
+  ) {
     if (selectedId) {
       closePopOver(selectedId);
     }
-    image.width -= image.clientWidth * 0.1;
-    image.height -= image.clientHeight * 0.1;
+
+    scale = 1 + -1 * 0.1;
+    const newWidth = getPixels(mainBody.style.width) * scale;
+    const newHeight = getPixels(mainBody.style.height) * scale;
+
+    mainBody.style.width = `${newWidth}px`;
+    mainBody.style.height = `${newHeight}px`;
+
+    // mainBody.style.width = `${getPixels(mainBody.style.width) - 100}px`;
+    // mainBody.style.height = `${getPixels(mainBody.style.height) - 100}px`;
+    // mainBody.click();
     reDraw();
   }
 
@@ -136,26 +168,33 @@ function zoomOut() {
 }
 
 function zoomReset() {
-  scale = 1;
-  zoom.style.transformOrigin = "0px 0px";
-  zoom.style.transform = `scale(${scale})`;
+  // scale = 1;
+  // mainBody.style.transformOrigin = "0px 0px";
+  // zoom.style.transform = `scale(${scale})`;
   // image.style.top = "0px";
   // image.style.left = "0px";
-  // mainBody.style.top = "0px";
+  // console.log();
+  // console.log(mainBody.getBoundingClientRect());
+  // mainBody.style.top = `${
+  //   mainBody.offsetTop + mainBody.getBoundingClientRect().x
+  // }px`;
   // mainBody.style.left = "0px";
-  // mainBody.style.transform = "translate(" + 0 + "px, " + 0 + "px) ";
+  mainBody.style.position = "initial";
+  mainBody.style.transform = `translate(${0}px, ${0}px) `;
+  mainBody.style.width = `${OrgImageSize.width}px`;
+  mainBody.style.height = `${OrgImageSize.height}px`;
+  // mainBody.click();
+  // image.width = OrgImageSize.width;
+  // image.height = OrgImageSize.height;
 
-  image.click();
-  image.width = OrgImageSize.width;
-  image.height = OrgImageSize.height;
   reDraw();
 }
 
 function reDraw() {
   console.log("reDraw called");
-  let mBody = document.getElementById("main-body");
-  mBody.style.width = `${image.width}px`;
-  mBody.style.height = `${image.height}px`;
+  // let mBody = document.getElementById("main-body");
+  // mBody.style.width = `${image.width}px`;
+  // mBody.style.height = `${image.height}px`;
 
   allShapes?.forEach((objZone) => {
     let ele = document.getElementById(`box${objZone.slug}`);
@@ -171,18 +210,8 @@ function reDraw() {
     addZoneBox(objZone);
   });
   allShapes = [...allShapes];
+  mainBody.click();
 }
-
-// var scale = 1;
-//   pointX = 0,
-//   pointY = 0,
-//   start = { x: 0, y: 0 },
-
-// let zoom = document.getElementById("main-body");
-
-// function setTransform(pointX, pointY, scale) {
-//   zoom.style.transform = `translate(${pointX}px, ${pointY}px) scale(${scale})`;
-// }
 
 function setTransform() {
   zoom.style.transform =
@@ -192,15 +221,15 @@ function setTransform() {
 zoom.onmousedown = function (e) {
   if (e.altKey) {
     // e.preventDefault();
-    start = { x: e.clientX - pointX, y: e.clientY - pointY };
+    start = { x: e.pageX - pointX, y: e.pageY - pointY };
     panning = true;
   }
 };
 
-zoom.onmouseup = function (e) {
-  if (e.altKey) {
-    panning = false;
-  }
+mainContainer.onmouseup = function (e) {
+  // if (e.altKey) {
+  panning = false;
+  // }
 };
 
 zoom.onmousemove = function (e) {
@@ -209,8 +238,8 @@ zoom.onmousemove = function (e) {
     if (!panning) {
       return;
     }
-    pointX = e.clientX - start.x;
-    pointY = e.clientY - start.y;
+    pointX = e.pageX - start.x;
+    pointY = e.pageY - start.y;
     setTransform();
   }
 };
@@ -232,14 +261,15 @@ zoom.onwheel = function (event) {
 
     //   setTransform();
     // Get the current mouse position relative to the image
-    const mouseX = event.offsetX;
-    const mouseY = event.offsetY;
+    // const mouseX = event.offsetX;
+    // const mouseY = event.offsetY;
+    let { x: mouseX, y: mouseY } = getMousePos(mainBody, event);
 
     // Calculate the new width and height based on mouse wheel delta
     const delta = Math.max(-1, Math.min(1, event.wheelDelta || -event.detail));
-    scale = 1 + delta * 0.1; // adjust the scaling factor as desired
-    const newWidth = image.width * scale;
-    const newHeight = image.height * scale;
+    scale = 1 + delta * 0.1;
+    const newWidth = getPixels(mainBody.style.width) * scale;
+    const newHeight = getPixels(mainBody.style.height) * scale;
 
     // Calculate the new position of the mouse relative to the scaled image
     const newMouseX = mouseX * scale;
@@ -252,18 +282,20 @@ zoom.onwheel = function (event) {
     // Adjust the image position to keep the mouse position fixed
 
     // Set the new width and height values
-    image.width = newWidth;
-    image.height = newHeight;
+    // image.width = newWidth;
+    // image.height = newHeight;
+    mainBody.style.width = `${newWidth}px`;
+    mainBody.style.height = `${newHeight}px`;
 
-    image.style.position = "absolute";
-    image.style.left = `${image.offsetLeft - deltaX}px`;
-    image.style.top = `${image.offsetTop - deltaY}px`;
+    // image.style.position = "absolute";
+    // image.style.left = `${image.offsetLeft - deltaX}px`;
+    // image.style.top = `${image.offsetTop - deltaY}px`;
 
-    // mainBody.style.position = "absolute";
-    // mainBody.style.left = `${image.offsetLeft - deltaX}px`;
-    // mainBody.style.top = `${image.offsetTop - deltaY}px`;
+    mainBody.style.position = "absolute";
+    mainBody.style.left = `${mainBody.offsetLeft - deltaX}px`;
+    mainBody.style.top = `${mainBody.offsetTop - deltaY}px`;
 
-    image.click();
+    // mainBody.click();
     if (selectedId) {
       closePopOver(selectedId);
     }
@@ -288,7 +320,7 @@ zoom.onwheel = function (event) {
 //   // var transformOriginX = (mouseX / zoom.offsetWidth) * 100;
 //   // var transformOriginY = (mouseY / zoom.offsetHeight) * 100;
 
-//   // image.click();
+//   // mainBody.click();
 //   // if (selectedId) {
 //   //   closePopOver(selectedId);
 //   // }
@@ -425,7 +457,7 @@ zoom.onwheel = function (event) {
 // mainBody.style.left = `${mouseX}px`;
 // mainBody.style.top = `${mouseY}px`;
 
-// image.click();
+// mainBody.click();
 // if (selectedId) {
 //   closePopOver(selectedId);
 // }
@@ -458,11 +490,15 @@ function setImageInViewPort() {
     } else {
       newHeight = newWidth / aspectRatio;
     }
-    image.width = newWidth;
-    image.height = newHeight;
-    OrgImageSize.width = image.width;
-    OrgImageSize.height = image.height;
+    // image.width = newWidth;
+    // image.height = newHeight;
     console.log("newWidth, newHeight :>> ", newWidth, newHeight);
+    OrgImageSize.width = newWidth;
+    OrgImageSize.height = newHeight;
+    mainBody.style.width = newWidth + "px";
+    mainBody.style.height = newHeight + "px";
+    mainBody.style.backgroundImage = `url(${image.src})`;
+    mainBody.style.backgroundSize = "cover";
   }
 
   // var maxWidth = tempViewportWidth;
@@ -537,7 +573,7 @@ mainBody.addEventListener("click", newZone);
 // User has clicked on the image so create a new zone
 function newZone(_event) {
   if (eventType === "rectangle") {
-    let { x, y } = getMousePos(image, _event);
+    let { x, y } = getMousePos(mainBody, _event);
     const objZone = {
       x,
       y,
@@ -550,7 +586,7 @@ function newZone(_event) {
     addZone(objZone);
     addZoneBox(objZone, _event);
   } else if (eventType === "point") {
-    let { x, y } = getMousePos(image, _event);
+    let { x, y } = getMousePos(mainBody, _event);
     const objZone = {
       width: 10,
       height: 10,
@@ -562,7 +598,7 @@ function newZone(_event) {
     addZone(objZone);
     addZoneBox(objZone, _event);
   } else if (eventType === "oval") {
-    let { x, y } = getMousePos(image, _event);
+    let { x, y } = getMousePos(mainBody, _event);
     const objZone = {
       x,
       y,
@@ -612,6 +648,8 @@ function addZoneBox(_objZone, _event) {
 
   theDiv.style.width = `${width}px`;
   theDiv.style.height = `${height}px`;
+  theDiv.style.top = `${y}px`;
+  theDiv.style.left = `${x}px`;
 
   // console.log("scale :>> ", scale);
   // if (scale > 1 || scale < 1) {
@@ -645,8 +683,7 @@ function addZoneBox(_objZone, _event) {
   // theDiv.style.top = `${y}px`;
   // theDiv.style.left = `${x}px`;
   // } else {
-  theDiv.style.top = `${y}px`;
-  theDiv.style.left = `${x}px`;
+
   // }
 
   makeDraggable(theDiv, _objZone);
@@ -668,18 +705,20 @@ function makeDraggable(_element, _objZone) {
 
   function handelMouseDown(e) {
     isDown = true;
-    let { x, y } = getMousePos(image, e);
-    startX = x;
-    startY = y;
-    document.addEventListener("mouseup", handelMouseUp);
-    document.addEventListener("mousemove", handelMouseMove);
+    if (isDown) {
+      let { x, y } = getMousePos(mainBody, e);
+      startX = x;
+      startY = y;
+      document.addEventListener("mouseup", handelMouseUp);
+      document.addEventListener("mousemove", handelMouseMove);
 
-    _element.className =
-      _objZone.type === "oval" || _objZone.type === "point"
-        ? "box oval"
-        : "box";
-    if (_objZone.type === "point") {
-      _element.classList.add("point");
+      _element.className =
+        _objZone.type === "oval" || _objZone.type === "point"
+          ? "box oval"
+          : "box";
+      if (_objZone.type === "point") {
+        _element.classList.add("point");
+      }
     }
   }
 
@@ -695,7 +734,7 @@ function makeDraggable(_element, _objZone) {
         return;
       }
 
-      let { x, y } = getMousePos(image, e);
+      let { x, y } = getMousePos(mainBody, e);
       endX = x;
       endY = y;
       let diffX = endX - startX;
@@ -710,34 +749,36 @@ function makeDraggable(_element, _objZone) {
   }
 
   function handelMouseUp(e) {
-    isDown = false;
-    if (!_element) {
-      return;
-    }
-
-    document.onmouseup = null;
-    document.onmousemove = null;
-    document.onmousedown = null;
-
-    _element.className =
-      _objZone.type === "oval" || _objZone.type === "point"
-        ? "boxNotActive oval"
-        : "boxNotActive";
-
-    if (_objZone.type === "point") {
-      _element.classList.add("point");
-    }
-
-    const objZone = getZoneFromBox(_element);
-
-    if (zoneOutsideImage(objZone)) {
-      console.log("deleteZone called.");
-      deleteZone({ ...objZone });
-    } else {
-      console.log("calling updateZone");
-      if (clickedId !== "image") {
-        updateZone(objZone);
+    if (isDown) {
+      if (!_element) {
+        return;
       }
+
+      document.onmouseup = null;
+      document.onmousemove = null;
+      document.onmousedown = null;
+
+      _element.className =
+        _objZone.type === "oval" || _objZone.type === "point"
+          ? "boxNotActive oval"
+          : "boxNotActive";
+
+      if (_objZone.type === "point") {
+        _element.classList.add("point");
+      }
+
+      const objZone = getZoneFromBox(_element);
+
+      if (zoneOutsideImage(objZone)) {
+        console.log("deleteZone called.");
+        deleteZone({ ...objZone });
+      } else {
+        console.log("calling updateZone");
+        if (clickedId !== "image") {
+          updateZone(objZone);
+        }
+      }
+      isDown = false;
     }
   }
 }
@@ -907,7 +948,7 @@ function makeResizable(_element, _objZone) {
     if (_objZone.type === "point") {
       _element.classList.add("point");
     }
-    image.click();
+    // mainBody.click();
     updateZone(getZoneFromBox(_element));
   }
 }
@@ -998,11 +1039,11 @@ function getZoneFromBox(_element) {
 
 // True when zone is dragged outside of the image
 function zoneOutsideImage(_objZone) {
-  const elImage = document.getElementById("image");
+  // const elImage = mainBody;
 
   if (
-    elImage.offsetLeft + elImage.width < _objZone?.x ||
-    elImage.offsetTop + elImage.height < _objZone?.y
+    mainBody.offsetLeft + mainBody.width < _objZone?.x ||
+    mainBody.offsetTop + mainBody.height < _objZone?.y
   ) {
     return true;
   } else {
@@ -1037,6 +1078,7 @@ function updateZone(_objZone) {
         _objZone.width = width;
         _objZone.height = height;
         arrZones.push(_objZone);
+        allHistory.push(_objZone);
       } else {
         arrZones.push(objZone);
       }
@@ -1079,6 +1121,7 @@ function addZone(_objZone) {
   _objZone.height = height;
   // }
   arrZones.push(_objZone);
+  allHistory.push(_objZone);
   allShapes = arrZones;
   // localStorage.setItem("allShapes", JSON.stringify(allShapes));
   saveZones(
@@ -1091,22 +1134,23 @@ function addZone(_objZone) {
 // Save zone collection in the field that is submitted
 function saveZones(_arr) {
   var strZones = "";
-  const elImage = document.getElementById("image");
+  // const elImage = mainBody;
+  // const elImage = document.getElementById("image");
 
-  const dblRatio = getImageRatio(elImage);
+  // const dblRatio = getImageRatio(elImage);
 
   _arr.forEach((objZone) => {
     if (strZones.length > 0) {
       strZones += "\n";
     }
     strZones +=
-      parseFloat((objZone.x - getElementPosition(elImage).x) * dblRatio) +
+      parseFloat(objZone.x) +
       " " +
-      parseFloat((objZone.y - getElementPosition(elImage).y) * dblRatio) +
+      parseFloat(objZone.y) +
       " " +
-      parseFloat(objZone.width * dblRatio) +
+      parseFloat(objZone.width) +
       " " +
-      parseFloat(objZone.height * dblRatio) +
+      parseFloat(objZone.height) +
       " " +
       objZone.slug +
       " " +
@@ -1120,17 +1164,17 @@ function saveZones(_arr) {
 function getZones() {
   const strZones = document.getElementsByName("ctrZones")[0].value;
   const arrZones = new Array();
-  const elImage = document.getElementById("image");
-  const dblRatio = getImageRatio(elImage);
+  // const elImage = document.getElementById("image");
+  // const dblRatio = getImageRatio(elImage);
 
   strZones.split(/\r?\n/).forEach((strLine) => {
     if (strLine.trim().length > 0) {
       const arrTokens = strLine.split(" ").filter((e) => e.trim().length > 0);
       arrZones.push({
-        x: parseFloat(arrTokens[0] / dblRatio) + getElementPosition(elImage).x,
-        y: parseFloat(arrTokens[1] / dblRatio) + getElementPosition(elImage).y,
-        width: parseFloat(arrTokens[2] / dblRatio),
-        height: parseFloat(arrTokens[3] / dblRatio),
+        x: parseFloat(arrTokens[0]),
+        y: parseFloat(arrTokens[1]),
+        width: parseFloat(arrTokens[2]),
+        height: parseFloat(arrTokens[3]),
         slug: arrTokens[4],
         type: arrTokens[5],
       });
@@ -1162,20 +1206,19 @@ function getElementPosition(_element) {
 
 // convert px To Percentage
 function pxToPercentage(_startX, _startY) {
-  let tempWidth = image.width * scale;
-  let tempHeight = image.height * scale;
-  let xPercent = parseFloat((_startX / tempWidth) * 100);
-  let yPercent = parseFloat((_startY / tempHeight) * 100);
+  let width = getPixels(mainBody.style.width);
+  let height = getPixels(mainBody.style.height);
+  let xPercent = parseFloat((_startX / width) * 100);
+  let yPercent = parseFloat((_startY / height) * 100);
   return { x: xPercent, y: yPercent };
 }
 
-// // convert Percentage To Px
-
+// convert Percentage To Px
 function PercentageToPx(_startX, _startY) {
-  let tempWidth = image.width * scale;
-  let tempHeight = image.height * scale;
-  let orgX = parseFloat((_startX / 100) * tempWidth);
-  let orgY = parseFloat((_startY / 100) * tempHeight);
+  let width = getPixels(mainBody.style.width);
+  let height = getPixels(mainBody.style.height);
+  let orgX = parseFloat((_startX / 100) * width);
+  let orgY = parseFloat((_startY / 100) * height);
   return { x: orgX, y: orgY };
 }
 
@@ -1184,7 +1227,7 @@ function selectBox(ID) {
   if (eventType === "") {
     let _id = Number(ID);
     if (selectedId === _id) {
-      image.click();
+      // mainBody.click();
       const boxes = document.querySelectorAll(".boxNotActive");
       boxes.forEach((box) => {
         box.style.border = "3px solid black";
@@ -1225,7 +1268,7 @@ function selectBox(ID) {
 
 // open popover
 function openPopOver(_selectedId) {
-  image.click();
+  // mainBody.click();
   let _shape = allShapes.filter(
     (item) => item.slug == _selectedId.toString()
   )[0];
@@ -1289,7 +1332,7 @@ function closePopOver(ID) {
   popover.style.display = "none";
 
   selectedId = null;
-  image.click();
+  // mainBody.click();
 }
 
 // close popover
