@@ -1,6 +1,8 @@
 var eventType = "";
 var allShapes = [];
 var allHistory = [];
+var currentIndex = 0;
+var cursorPosition = 0;
 var allDetails = [];
 var rotationAngle = 0;
 var selectedId = null;
@@ -21,8 +23,7 @@ var mouseY = 0,
   panning = false,
   pointX = 0,
   pointY = 0,
-  start = { x: 0, y: 0 },
-  zoom = document.getElementById("main-body");
+  start = { x: 0, y: 0 };
 
 var OrgImageSize = {
   width: 0,
@@ -62,10 +63,157 @@ function setType(_type) {
 }
 
 function undo() {
-  console.log("allHistory :>> ", allHistory);
+  if (allHistory.length >= currentIndex) {
+    currentIndex++;
+    cursorPosition = allHistory.length - currentIndex;
+
+    if (cursorPosition >= 0) {
+      let data = allHistory[cursorPosition];
+      console.log("data :>> ", data);
+      let tempShape = allShapes.filter((item) => item.slug === data?.slug)[0];
+      if (
+        tempShape.x === data.x &&
+        tempShape.y === data.y &&
+        tempShape.slug === data.slug
+      ) {
+        currentIndex++;
+        cursorPosition = allHistory.length - currentIndex;
+        let data = allHistory[cursorPosition];
+        if (data) {
+          let _element = document.getElementById("box" + data.slug);
+          let { x, y } = PercentageToPx(data.x, data.y);
+          let { x: width, y: height } = PercentageToPx(data.width, data.height);
+          _element.style.top = `${y}px`;
+          _element.style.left = `${x}px`;
+          _element.style.width = `${width}px`;
+          _element.style.height = `${height}px`;
+
+          let popover = document.getElementById("popover");
+          popover.style.display = "none";
+
+          updateZone({
+            x: X,
+            y: Y,
+            width,
+            height,
+            type: data.type,
+            slug: data.slug,
+          });
+        }
+      } else {
+        if (data) {
+          let _element = document.getElementById("box" + data.slug);
+          let { x, y } = PercentageToPx(data.x, data.y);
+          let { x: width, y: height } = PercentageToPx(data.width, data.height);
+          _element.style.top = `${y}px`;
+          _element.style.left = `${x}px`;
+          _element.style.width = `${width}px`;
+          _element.style.height = `${height}px`;
+
+          let popover = document.getElementById("popover");
+          popover.style.display = "none";
+
+          updateZone({
+            x,
+            y,
+            width,
+            height,
+            type: data.type,
+            slug: data.slug,
+          });
+        }
+      }
+    } else {
+      cursorPosition = 0;
+    }
+    console.log("cursorPosition :", cursorPosition);
+  }
+  //   currentIndex++;
+  //   cursorPosition = allHistory.length - currentIndex;
+  //   console.log("cursorPosition :", cursorPosition);
+  //   let data = allHistory[cursorPosition];
+  //   let tempShape = allShapes.filter((item) => item.slug === data?.slug)[0];
+  //   console.log("tempShape :>> ", tempShape);
+  // if (
+  //   cursorPosition >= 0 &&
+  //   tempShape.x === data.x &&
+  //   tempShape.y === data.y &&
+  //   tempShape.slug === data.slug
+  // ) {
+  //   currentIndex++;
+  //   cursorPosition = allHistory.length - currentIndex;
+  //   let data = allHistory[cursorPosition];
+  //   if (data) {
+  //     let _element = document.getElementById("box" + data.slug);
+  //     let { x, y } = PercentageToPx(data.x, data.y);
+  //     _element.style.top = `${y}px`;
+  //     _element.style.left = `${x}px`;
+  //     let popover = document.getElementById("popover");
+  //     popover.style.display = "none";
+
+  //     let { x: X, y: Y } = PercentageToPx(data.x, data.y);
+  //     let { x: width, y: height } = PercentageToPx(data.width, data.height);
+  //     updateZone({
+  //       x: X,
+  //       y: Y,
+  //       width,
+  //       height,
+  //       type: data.type,
+  //       slug: data.slug,
+  //     });
+  //   }
+  // } else {
+  //   currentIndex++;
+  //   let _element = document.getElementById("box" + data.slug);
+  //   let { x, y } = PercentageToPx(data.x, data.y);
+  //   _element.style.top = `${y}px`;
+  //   _element.style.left = `${x}px`;
+  //   let popover = document.getElementById("popover");
+  //   popover.style.display = "none";
+
+  //   let { x: X, y: Y } = PercentageToPx(data.x, data.y);
+  //   let { x: width, y: height } = PercentageToPx(data.width, data.height);
+  //   updateZone({
+  //     x: X,
+  //     y: Y,
+  //     width,
+  //     height,
+  //     type: data.type,
+  //     slug: data.slug,
+  //   });
+  //   // }
+  // }
 }
+
 function redo() {
-  console.log("allHistory :>> ", allHistory);
+  console.log("currentIndex", currentIndex);
+  if (currentIndex >= 0) {
+    cursorPosition = allHistory.length - currentIndex;
+    currentIndex--;
+    console.log("cursorPosition :", cursorPosition);
+    let data = allHistory[cursorPosition];
+    console.log("data :>> ", data);
+    if (data) {
+      let _element = document.getElementById("box" + data.slug);
+      let { x, y } = PercentageToPx(data.x, data.y);
+      let { x: width, y: height } = PercentageToPx(data.width, data.height);
+      _element.style.top = `${y}px`;
+      _element.style.left = `${x}px`;
+      _element.style.width = `${width}px`;
+      _element.style.height = `${height}px`;
+      let popover = document.getElementById("popover");
+      popover.style.display = "none";
+
+      updateZone({
+        x,
+        y,
+        width,
+        height,
+        type: data.type,
+        slug: data.slug,
+      });
+    }
+  }
 }
 
 function rotateImage(mainBody) {
@@ -134,7 +282,9 @@ function zoomIn() {
   // mainBody.style.width = `${getPixels(mainBody.style.width) + 100}px`;
   // mainBody.style.height = `${getPixels(mainBody.style.height) + 100}px`;
   // mainBody.click();
-  reDraw();
+  if (allShapes.length > 0) {
+    reDraw();
+  }
   // scale *= 1.2;
   // zoom.style.transformOrigin = "0px 0px";
   // zoom.style.transform = `scale(${scale})`;
@@ -142,8 +292,8 @@ function zoomIn() {
 
 function zoomOut() {
   if (
-    getPixels(mainBody.style.width) >= 150 ||
-    getPixels(mainBody.style.height) >= 150
+    getPixels(mainBody.style.width) >= 250 ||
+    getPixels(mainBody.style.height) >= 250
   ) {
     if (selectedId) {
       closePopOver(selectedId);
@@ -159,7 +309,9 @@ function zoomOut() {
     // mainBody.style.width = `${getPixels(mainBody.style.width) - 100}px`;
     // mainBody.style.height = `${getPixels(mainBody.style.height) - 100}px`;
     // mainBody.click();
-    reDraw();
+    if (allShapes.length > 0) {
+      reDraw();
+    }
   }
 
   // scale /= 1.2;
@@ -186,8 +338,9 @@ function zoomReset() {
   // mainBody.click();
   // image.width = OrgImageSize.width;
   // image.height = OrgImageSize.height;
-
-  reDraw();
+  if (allShapes.length > 0) {
+    reDraw();
+  }
 }
 
 function reDraw() {
@@ -214,11 +367,11 @@ function reDraw() {
 }
 
 function setTransform() {
-  zoom.style.transform =
+  mainBody.style.transform =
     "translate(" + pointX + "px, " + pointY + "px) scale(" + scale + ")";
 }
 
-zoom.onmousedown = function (e) {
+mainBody.onmousedown = function (e) {
   if (e.altKey) {
     // e.preventDefault();
     start = { x: e.pageX - pointX, y: e.pageY - pointY };
@@ -226,13 +379,13 @@ zoom.onmousedown = function (e) {
   }
 };
 
-mainContainer.onmouseup = function (e) {
+mainContainer.onmouseup = function (_e) {
   // if (e.altKey) {
   panning = false;
   // }
 };
 
-zoom.onmousemove = function (e) {
+mainBody.onmousemove = function (e) {
   if (e.altKey) {
     e.preventDefault();
     if (!panning) {
@@ -244,7 +397,7 @@ zoom.onmousemove = function (e) {
   }
 };
 
-zoom.onwheel = function (event) {
+mainBody.onwheel = function (event) {
   if (event.shiftKey) {
     event.preventDefault();
     //   var xs = (e.offsetX - pointX) / scale,
@@ -299,7 +452,9 @@ zoom.onwheel = function (event) {
     if (selectedId) {
       closePopOver(selectedId);
     }
-    reDraw();
+    if (allShapes.length > 0) {
+      reDraw();
+    }
   }
 };
 
@@ -568,6 +723,11 @@ window.onload = () => {
 };
 
 mainBody.addEventListener("click", newZone);
+
+window.onresize = (_e) => {
+  window.location.reload();
+};
+
 // mainBody.addEventListener("wheel", zoomImageOnWheel);
 
 // User has clicked on the image so create a new zone
@@ -615,7 +775,7 @@ function newZone(_event) {
   eventType = "";
 }
 
-function isMouseInShape(event, mx, my, shape) {
+function isMouseInShape(_event, mx, my, shape) {
   let { x, y } = PercentageToPx(shape.x, shape.y);
   let { x: width, y: height } = PercentageToPx(shape.width, shape.height);
   var rLeft = x;
@@ -748,7 +908,7 @@ function makeDraggable(_element, _objZone) {
     }
   }
 
-  function handelMouseUp(e) {
+  function handelMouseUp(_e) {
     if (isDown) {
       if (!_element) {
         return;
@@ -770,11 +930,13 @@ function makeDraggable(_element, _objZone) {
       const objZone = getZoneFromBox(_element);
 
       if (zoneOutsideImage(objZone)) {
-        console.log("deleteZone called.");
+        // console.log("deleteZone called.");
         deleteZone({ ...objZone });
       } else {
-        console.log("calling updateZone");
+        // console.log("calling updateZone");
         if (clickedId !== "image") {
+          allHistory.push(objZone);
+          // console.log("allHistory :>> ", allHistory);
           updateZone(objZone);
         }
       }
@@ -948,8 +1110,24 @@ function makeResizable(_element, _objZone) {
     if (_objZone.type === "point") {
       _element.classList.add("point");
     }
+    let tempShape = getZoneFromBox(_element);
+    console.log("tempShape :>> ", tempShape);
+    let { x: X, y: Y } = pxToPercentage(tempShape.x, tempShape.y);
+    let { x: width, y: height } = pxToPercentage(
+      tempShape.width,
+      tempShape.height
+    );
+    allHistory.push({
+      x: X,
+      y: Y,
+      width,
+      height,
+      type: tempShape.type,
+      slug: tempShape.slug,
+    });
+
     // mainBody.click();
-    updateZone(getZoneFromBox(_element));
+    updateZone(tempShape);
   }
 }
 
@@ -1014,7 +1192,7 @@ function initZones() {
 
 // Get the next slug (by adding 1 to the highest slug so far)
 function getNextZoneSequence() {
-  return Math.floor(Math.random().toFixed(5) * 100000);
+  return Math.floor(Math.random().toFixed(5) * 100000).toString();
 }
 
 // User has selected a box on the screen, get the associated objZone
@@ -1064,6 +1242,7 @@ function getPixels(_x) {
 // Replace zone with zone passed as parameter
 function updateZone(_objZone) {
   console.log("updateZone");
+
   if (eventType !== "erase" || (eventType !== "clear" && eventType === "")) {
     const arrZones = new Array();
     getZones().forEach((objZone) => {
@@ -1078,13 +1257,13 @@ function updateZone(_objZone) {
         _objZone.width = width;
         _objZone.height = height;
         arrZones.push(_objZone);
-        allHistory.push(_objZone);
       } else {
         arrZones.push(objZone);
       }
     });
     allShapes = arrZones;
     console.log("allShapes :>> ", allShapes);
+    console.log("allHistory :>> ", allHistory);
 
     // localStorage.setItem("allShapes", JSON.stringify(arrZones));
     saveZones(arrZones);
@@ -1122,7 +1301,9 @@ function addZone(_objZone) {
   // }
   arrZones.push(_objZone);
   allHistory.push(_objZone);
+  console.log("allHistory :>> ", allHistory);
   allShapes = arrZones;
+  console.log("allShapes :>> ", allShapes);
   // localStorage.setItem("allShapes", JSON.stringify(allShapes));
   saveZones(
     arrZones.sort(function (a, b) {
